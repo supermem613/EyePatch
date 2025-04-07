@@ -3,16 +3,16 @@ using LibGit2Sharp;
 
 namespace EyePatch
 {
-    internal class Diff
+    internal static class Diff
     {
         public static void Execute()
         {
             // Set the path to the repository
-            string repoPath = Path.GetDirectoryName(Repository.Discover(Environment.CurrentDirectory));
+            var repoPath = Path.GetDirectoryName(Repository.Discover(Environment.CurrentDirectory));
 
             if (repoPath == null)
             {
-                Console.WriteLine("Not inside a Git repository.");
+                ConsoleWriter.WriteError("Not inside a Git repository.");
                 return;
             }
 
@@ -21,7 +21,7 @@ namespace EyePatch
 
             // Get the current branch
             var currentBranch = repo.Head;
-            Console.WriteLine($"Current Branch: {currentBranch.FriendlyName}");
+            ConsoleWriter.WriteInfo($"Current Branch: {currentBranch.FriendlyName}");
 
             // Find the commit where the current branch diverged from its parent branch
             var parentCommit = repo.ObjectDatabase.FindMergeBase(
@@ -30,11 +30,11 @@ namespace EyePatch
 
             if (parentCommit == null)
             {
-                Console.WriteLine("Could not determine the parent commit.");
+                ConsoleWriter.WriteError("Could not determine the parent commit.");
                 return;
             }
 
-            Console.WriteLine($"Parent Commit: {parentCommit.Sha}");
+            ConsoleWriter.WriteInfo($"Parent Commit: {parentCommit.Sha}");
 
             // Generate the diff based on the parent commit
             var diffOptions = new CompareOptions();
@@ -44,7 +44,7 @@ namespace EyePatch
                 diffOptions);
 
             // Create a temporary folder to store original files
-            string tempFolder = Path.Combine(Path.GetTempPath(), "EyePatch-Diff");
+            var tempFolder = Path.Combine(Path.GetTempPath(), "EyePatch-Diff");
 
             // Clear the directory if it already exists
             if (Directory.Exists(tempFolder))
@@ -59,40 +59,44 @@ namespace EyePatch
                     parentCommit.Tree,
                     currentBranch.Tip.Tree);
 
-            List<string> modifiedFiles = new List<string>();
-            Console.WriteLine($"\nFiles ({patch.Count()}):\n");
+            List<string> modifiedFiles = [];
+            ConsoleWriter.WriteInfo($"\nFiles ({patch.Count()}):\n");
             foreach (var change in changes)
             {
-                if (change.Status == ChangeKind.Modified || change.Status == ChangeKind.Added ||
-                    change.Status == ChangeKind.Deleted)
+                if (change.Status is ChangeKind.Modified or ChangeKind.Added or ChangeKind.Deleted)
                 {
-                    Console.WriteLine($"{change.Path} ({change.Status})");
+                    ConsoleWriter.WriteInfo($"{change.Path} ({change.Status})");
                     modifiedFiles.Add(change.Path);
                 }
             }
 
-            string workingDirectory = Path.GetDirectoryName(repoPath);
+            var workingDirectory = Path.GetDirectoryName(repoPath) ?? string.Empty;
+            if (string.IsNullOrEmpty(workingDirectory))
+            {
+                ConsoleWriter.WriteError("Working directory not found.");
+                return;
+            }
 
-            List<string> diffFilePairs = new List<string>();
+            List<string> diffFilePairs = [];
 
             foreach (var modifiedFile in modifiedFiles)
             {
                 try
                 {
-                    string tempFilePath =
+                    var tempFilePath =
                         Path.Combine(tempFolder, modifiedFile.Replace("/", "_"));
-                    string currentFilePath =
+                    var currentFilePath =
                         Path.Combine(workingDirectory, modifiedFile.Replace("/", "\\"));
 
                     // Extract the original file content to a temp file
-                    Blob originalBlob = parentCommit[modifiedFile]?.Target as Blob;
+                    var originalBlob = parentCommit[modifiedFile]?.Target as Blob;
                     if (originalBlob != null)
                     {
                         File.WriteAllText(tempFilePath, originalBlob.GetContentText());
                     }
                     else
                     {
-                        Console.WriteLine($"Skipping {modifiedFile}, as no original version found.");
+                        ConsoleWriter.WriteWarning($"Skipping {modifiedFile}, as no original version found.");
                         continue;
                     }
 
@@ -100,12 +104,12 @@ namespace EyePatch
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error processing diff for {modifiedFile}: {ex.Message}");
+                    ConsoleWriter.WriteError($"Error processing diff for {modifiedFile}: {ex.Message}");
                 }
             }
 
             // Write the file pairs to a temporary file
-            string diffFileListPath = Path.Combine(tempFolder, "diffFileList.txt");
+            var diffFileListPath = Path.Combine(tempFolder, "diffFileList.txt");
             File.WriteAllLines(diffFileListPath, diffFilePairs);
 
             var process = new Process
@@ -119,7 +123,7 @@ namespace EyePatch
                 }
             };
 
-            Console.WriteLine($"\nWaiting on diff window to close.");
+            ConsoleWriter.WriteSuccess($"\nAll done. Waiting on diff window to close...");
 
             process.Start();
             process.WaitForExit();

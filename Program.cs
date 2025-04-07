@@ -2,18 +2,18 @@
 
 namespace EyePatch
 {
-    class Program
+    internal static class Program
     {
-        class Options
+        private class Options
         {
             [Value(0, MetaName = "command", Required = true, HelpText = "The command to execute (e.g., save).")]
-            public string Command { get; set; }
+            public required string Command { get; set; }
 
             [Option('n', "name", Required = false, HelpText = "Optional name for the patch file.")]
-            public string Name { get; set; }
+            public required string Name { get; set; }
         }
         
-        static void ShowHelp()
+        private static void ShowHelp()
         {
             Console.WriteLine("Usage: EyePatch <command> [options]");
             Console.WriteLine();
@@ -25,7 +25,7 @@ namespace EyePatch
             Console.WriteLine("  -n, --name   Optional name for the patch file (used with 'save' command), otherwise the branch name is used.");
         }
 
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.Length == 0)
             {
@@ -36,11 +36,13 @@ namespace EyePatch
             Parser.Default.ParseArguments<Program.Options>(args)
                 .WithParsed(options =>
                 {
-                    if (options.Command.ToLower() == "save")
+                    ArgumentNullException.ThrowIfNull(options);
+
+                    if (options.Command.Equals("save", StringComparison.CurrentCultureIgnoreCase))
                     {
                         Save.Execute(options.Name);
                     }
-                    if (options.Command.ToLower() == "diff")
+                    if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
                     {
                         Diff.Execute();
                     }

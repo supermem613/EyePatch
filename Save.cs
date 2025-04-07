@@ -2,12 +2,12 @@
 
 namespace EyePatch
 {
-    internal class Save
+    internal static class Save
     {
         private static string EnsurePatchesDirectoryExists()
         {
             // Retrieve the OneDrive path from the environment variable
-            string oneDrivePath = Environment.GetEnvironmentVariable("OneDrive");
+            var oneDrivePath = Environment.GetEnvironmentVariable("OneDrive");
 
             if (string.IsNullOrEmpty(oneDrivePath))
             {
@@ -15,7 +15,7 @@ namespace EyePatch
             }
 
             // Construct the full path to the "patches" directory
-            string patchesPath = Path.Combine(oneDrivePath, "patches");
+            var patchesPath = Path.Combine(oneDrivePath, "patches");
 
             // Ensure the "patches" directory exists
             if (!Directory.Exists(patchesPath))
@@ -30,11 +30,11 @@ namespace EyePatch
         public static void Execute(string patchFileName)
         {
             // Set the path to the repository
-            string repoPath = Repository.Discover(Environment.CurrentDirectory);
+            var repoPath = Repository.Discover(Environment.CurrentDirectory);
 
             if (repoPath == null)
             {
-                Console.WriteLine("Not inside a Git repository.");
+                ConsoleWriter.WriteError("Not inside a Git repository.");
                 return;
             }
 
@@ -43,7 +43,7 @@ namespace EyePatch
 
             // Get the current branch
             var currentBranch = repo.Head;
-            Console.WriteLine($"Current Branch: {currentBranch.FriendlyName}");
+            ConsoleWriter.WriteInfo($"Current Branch: {currentBranch.FriendlyName}");
 
             // Use branch name as default patch file name if none is provided
             if (string.IsNullOrEmpty(patchFileName))
@@ -63,11 +63,11 @@ namespace EyePatch
 
             if (parentCommit == null)
             {
-                Console.WriteLine("Could not determine the parent commit.");
+                ConsoleWriter.WriteError("Could not determine the parent commit.");
                 return;
             }
 
-            Console.WriteLine($"Parent Commit: {parentCommit.Sha}");
+            ConsoleWriter.WriteInfo($"Parent Commit: {parentCommit.Sha}");
 
             // Generate the diff based on the parent commit
             var diffOptions = new CompareOptions();
@@ -76,14 +76,11 @@ namespace EyePatch
                 currentBranch.Tip.Tree,
                 diffOptions);
 
-            // Display the number of files in the patch
-            Console.WriteLine($"\nNumber of files in the patch: {patch.Count()}");
-
-            Console.WriteLine("\nGit Diff:");
+            ConsoleWriter.WriteInfo($"\nFiles ({patch.Count()}):");
             foreach (var entry in patch)
             {
-                Console.WriteLine($"File: {entry.Path}");
-                Console.WriteLine($"Status: {entry.Status}");
+                ConsoleWriter.WriteInfo($"File: {entry.Path}");
+                ConsoleWriter.WriteInfo($"Status: {entry.Status}");
             }
 
             patchFileName = Path.Combine(
@@ -94,12 +91,12 @@ namespace EyePatch
                     DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"),
                     ".patch"));
 
-            using (StreamWriter writer = new StreamWriter(patchFileName))
+            using (var writer = new StreamWriter(patchFileName))
             {
                 writer.Write(patch.Content);
             }
 
-            Console.WriteLine($"\nPatch file written: {patchFileName}");
+            ConsoleWriter.WriteSuccess($"\nPatch file written: \"{patchFileName}\"");
         }
     }
 }
