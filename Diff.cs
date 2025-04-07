@@ -5,38 +5,6 @@ namespace EyePatch
 {
     internal class Diff
     {
-        enum DiffProgram
-        {
-            Vscode,
-            Sdvdiff
-        }
-
-        private static string FindVSCodeCmdPath()
-        {
-            // Common installation directories for Visual Studio Code
-            string[] possiblePaths = new[]
-            {
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Microsoft VS Code",
-                    "bin", "code.cmd"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Microsoft VS Code",
-                    "bin", "code.cmd"),
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs",
-                    "Microsoft VS Code", "bin", "code.cmd")
-            };
-
-            // Check each possible path for code.cmd
-            foreach (string path in possiblePaths)
-            {
-                if (File.Exists(path))
-                {
-                    return path;
-                }
-            }
-
-            throw new InvalidOperationException(
-                "Visual Studio Code is not found. Please ensure it is installed and accessible.");
-        }
-
         public static void Execute()
         {
             // Set the path to the repository
@@ -47,8 +15,6 @@ namespace EyePatch
                 Console.WriteLine("Not inside a Git repository.");
                 return;
             }
-
-            var diffProgram = DiffProgram.Sdvdiff;
 
             // Open the repository
             using var repo = new Repository(repoPath);
@@ -130,71 +96,48 @@ namespace EyePatch
 
             string workingDirectory = Path.GetDirectoryName(repoPath);
 
-            string diffExePath;
-            switch (diffProgram)
-            {
-                case DiffProgram.Sdvdiff:
-                    diffExePath = "sdvdiff";
-                    break;
-                case DiffProgram.Vscode:
-                    diffExePath = FindVSCodeCmdPath();
-                    break;
-                default:
-                    throw new InvalidOperationException("Unknown diff program");
-            }
-            Console.WriteLine($"Diff program: {diffExePath}");
+            List<string> diffFilePairs = new List<string>();
 
-            // For each modified file, save the original version to the temp folder and open a diff
-            foreach (var filePath in modifiedFiles)
+            foreach (var modifiedFile in modifiedFiles)
             {
                 try
                 {
                     string tempFilePath =
-                        Path.Combine(tempFolder, filePath.Replace("/", "_")); // Save with a unique file name
+                        Path.Combine(tempFolder, modifiedFile.Replace("/", "_"));
                     string currentFilePath =
-                        Path.Combine(workingDirectory, filePath.Replace("/", "\\")); // Current modified file path
+                        Path.Combine(workingDirectory, modifiedFile.Replace("/", "\\"));
 
                     // Extract the original file content to a temp file
-                    Blob originalBlob = parentCommit[filePath]?.Target as Blob;
+                    Blob originalBlob = parentCommit[modifiedFile]?.Target as Blob;
                     if (originalBlob != null)
                     {
                         File.WriteAllText(tempFilePath, originalBlob.GetContentText());
                     }
                     else
                     {
-                        Console.WriteLine($"Skipping {filePath}, as no original version found.");
+                        Console.WriteLine($"Skipping {modifiedFile}, as no original version found.");
                         continue;
                     }
 
-                    string diffArguments;
-                    switch (diffProgram)
-                    {
-                        case DiffProgram.Sdvdiff:
-                            diffArguments = $"\"{tempFilePath}\" \"{currentFilePath}\"";
-                            break;
-                        case DiffProgram.Vscode:
-                            diffArguments = $"--diff \"{tempFilePath}\" \"{currentFilePath}\"";
-                            break;
-                        default:
-                            throw new InvalidOperationException("Unknown diff program");
-                    }
-
-                    // Launch VS Code to show the diff
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = diffExePath,
-                        Arguments = diffArguments,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                    });
-
-                    Console.WriteLine($"Opened diff for: {tempFilePath} vs. {currentFilePath}");
+                    diffFilePairs.Add($"{tempFilePath} {currentFilePath}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error opening diff for {filePath}: {ex.Message}");
+                    Console.WriteLine($"Error processing diff for {modifiedFile}: {ex.Message}");
                 }
             }
+
+            // Write the file pairs to a temporary file
+            string diffFileListPath = Path.Combine(tempFolder, "diffFileList.txt");
+            File.WriteAllLines(diffFileListPath, diffFilePairs);
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "cmd.exe",
+                Arguments = $"/c type \"{diffFileListPath}\" | sdvdiff -i-",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            });
 
             Console.WriteLine($"\nOriginal files written to temporary folder: {tempFolder}");
         }
