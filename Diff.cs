@@ -43,37 +43,16 @@ namespace EyePatch
                 currentBranch.Tip.Tree,
                 diffOptions);
 
-            // Display the number of files in the patch
-            Console.WriteLine($"\nNumber of files in the patch: {patch.Count()}");
-
-            Console.WriteLine("\nGit Diff:");
-            foreach (var entry in patch)
-            {
-                Console.WriteLine($"File: {entry.Path}");
-                Console.WriteLine($"Status: {entry.Status}");
-            }
-
-
             // Create a temporary folder to store original files
             string tempFolder = Path.Combine(Path.GetTempPath(), "EyePatch-Diff");
 
             // Clear the directory if it already exists
             if (Directory.Exists(tempFolder))
             {
-                DirectoryInfo di = new DirectoryInfo(tempFolder);
-                foreach (FileInfo file in di.GetFiles())
-                {
-                    file.Delete();
-                }
-                foreach (DirectoryInfo dir in di.GetDirectories())
-                {
-                    dir.Delete(true);
-                }
+                Directory.Delete(tempFolder, true);
             }
-            else
-            {
-                Directory.CreateDirectory(tempFolder);
-            }
+             
+            Directory.CreateDirectory(tempFolder);
 
             // Find the list of modified files in the current branch
             var changes = repo.Diff.Compare<TreeChanges>(
@@ -81,7 +60,7 @@ namespace EyePatch
                     currentBranch.Tip.Tree);
 
             List<string> modifiedFiles = new List<string>();
-            Console.WriteLine("Modified Files:");
+            Console.WriteLine($"\nFiles ({patch.Count()}):\n");
             foreach (var change in changes)
             {
                 if (change.Status == ChangeKind.Modified || change.Status == ChangeKind.Added ||
@@ -91,8 +70,6 @@ namespace EyePatch
                     modifiedFiles.Add(change.Path);
                 }
             }
-
-            Console.WriteLine("\nOpening Diffs in VS Code:");
 
             string workingDirectory = Path.GetDirectoryName(repoPath);
 
@@ -131,15 +108,27 @@ namespace EyePatch
             string diffFileListPath = Path.Combine(tempFolder, "diffFileList.txt");
             File.WriteAllLines(diffFileListPath, diffFilePairs);
 
-            Process.Start(new ProcessStartInfo
+            var process = new Process
             {
-                FileName = "cmd.exe",
-                Arguments = $"/c type \"{diffFileListPath}\" | sdvdiff -i-",
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            });
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c type \"{diffFileListPath}\" | sdvdiff -i-",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
 
-            Console.WriteLine($"\nOriginal files written to temporary folder: {tempFolder}");
+            Console.WriteLine($"\nWaiting on diff window to close.");
+
+            process.Start();
+            process.WaitForExit();
+
+            // Clean up the temporary folder
+            if (Directory.Exists(tempFolder))
+            {
+                Directory.Delete(tempFolder, true);
+            }
         }
     }
 }
