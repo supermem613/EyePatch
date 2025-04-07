@@ -12,9 +12,27 @@ namespace EyePatch
             [Option('n', "name", Required = false, HelpText = "Optional name for the patch file.")]
             public string Name { get; set; }
         }
+        
+        static void ShowHelp()
+        {
+            Console.WriteLine("Usage: EyePatch <command> [options]");
+            Console.WriteLine();
+            Console.WriteLine("Commands:");
+            Console.WriteLine("  save   Save the current state to a file in OneDrive. Optionally specify a name for the patch file.");
+            Console.WriteLine("  diff   Show the differences.");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine("  -n, --name   Optional name for the patch file (used with 'save' command), otherwise the branch name is used.");
+        }
 
         static void Main(string[] args)
         {
+            if (args.Length == 0)
+            {
+                ShowHelp();
+                return;
+            }
+
             Parser.Default.ParseArguments<Program.Options>(args)
                 .WithParsed(options =>
                 {
