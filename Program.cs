@@ -42,13 +42,13 @@ namespace EyePatch
                     {
                         Save.Execute(options.Name);
                     }
-                    if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
+                    else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
                     {
                         Diff.Execute();
                     }
                     else
                     {
-                        Console.WriteLine("Unknown command. Supported commands: save");
+                        Console.WriteLine("Unknown command.");
                     }
                 })
                 .WithNotParsed(errors =>
