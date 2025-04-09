@@ -15,14 +15,14 @@ namespace EyePatch
         
         private static void ShowHelp()
         {
-            Console.WriteLine("Usage: EyePatch <command> [options]");
-            Console.WriteLine();
-            Console.WriteLine("Commands:");
-            Console.WriteLine("  save   Save the current state to a file in OneDrive. Optionally specify a name for the patch file.");
-            Console.WriteLine("  diff   Show the differences.");
-            Console.WriteLine();
-            Console.WriteLine("Options:");
-            Console.WriteLine("  -n, --name   Optional name for the patch file (used with 'save' command), otherwise the branch name is used.");
+            ConsoleWriter.WriteInfo("Usage: EyePatch <command> [options]");
+            ConsoleWriter.WriteInfo("");
+            ConsoleWriter.WriteInfo("Commands:");
+            ConsoleWriter.WriteInfo("  save   Save the current state to a file in OneDrive. Optionally specify a name for the patch file.");
+            ConsoleWriter.WriteInfo("  diff   Show the differences.");
+            ConsoleWriter.WriteInfo("");
+            ConsoleWriter.WriteInfo("Options:");
+            ConsoleWriter.WriteInfo("  -n, --name   Optional name for the patch file (used with 'save' command), otherwise the branch name is used.");
         }
 
         public static void Main(string[] args)
@@ -48,12 +48,12 @@ namespace EyePatch
                     }
                     else
                     {
-                        Console.WriteLine("Unknown command.");
+                        ConsoleWriter.WriteError("Unknown command.");
                     }
                 })
                 .WithNotParsed(errors =>
                 {
-                    Console.WriteLine("Failed to parse arguments. Use '--help' for usage instructions.");
+                    ConsoleWriter.WriteError("Failed to parse arguments. Use '--help' for usage instructions.");
                 });
         }
     }
