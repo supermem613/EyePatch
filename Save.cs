@@ -76,6 +76,12 @@ namespace EyePatch
                 currentBranch.Tip.Tree,
                 diffOptions);
 
+            if (patch.Count() == 0)
+            {
+                ConsoleWriter.WriteWarning("No changes to save.");
+                return;
+            }
+
             ConsoleWriter.WriteInfo($"\nFiles ({patch.Count()}):");
             foreach (var entry in patch)
             {
@@ -96,7 +102,15 @@ namespace EyePatch
                 writer.Write(patch.Content);
             }
 
+            if (!File.Exists(patchFileName) || new FileInfo(patchFileName).Length == 0)
+            {
+                ConsoleWriter.WriteError("Patch file was not created or is empty.");
+                return;
+            }
+
             ConsoleWriter.WriteSuccess($"\nPatch file written: \"{patchFileName}\"");
+
+
         }
     }
 }
