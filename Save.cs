@@ -26,7 +26,7 @@ namespace EyePatch
             // Return the full path
             return patchesPath;
         }
-
+        
         public static void Execute(string patchFileName)
         {
             // Set the path to the repository
@@ -69,12 +69,10 @@ namespace EyePatch
 
             ConsoleWriter.WriteInfo($"Parent Commit: {parentCommit.Sha}");
 
-            // Generate the diff based on the parent commit
-            var diffOptions = new CompareOptions();
+            // Generate the diff based on the parent commit, including staged and unstaged changes
             var patch = repo.Diff.Compare<Patch>(
                 parentCommit.Tree,
-                currentBranch.Tip.Tree,
-                diffOptions);
+                DiffTargets.Index | DiffTargets.WorkingDirectory);
 
             if (!patch.Any())
             {
@@ -109,9 +107,6 @@ namespace EyePatch
             }
 
             ConsoleWriter.WriteSuccess($"\nPatch file written: \"{patchFileName}\"");
-
-
         }
     }
 }
-

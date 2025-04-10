@@ -18,8 +18,10 @@ namespace EyePatch
             ConsoleWriter.WriteInfo("Usage: EyePatch <command> [options]");
             ConsoleWriter.WriteInfo("");
             ConsoleWriter.WriteInfo("Commands:");
-            ConsoleWriter.WriteInfo("  save   Save the current state to a file in OneDrive. Optionally specify a name for the patch file.");
-            ConsoleWriter.WriteInfo("  diff   Show the differences.");
+            ConsoleWriter.WriteInfo("  save   Save the resultant committed changes in a branch since it forked, plus any current changes (staged or not)");
+            ConsoleWriter.WriteInfo("         producing a single patch. Optionally specify a name for the patch file.");
+            ConsoleWriter.WriteInfo("  diff   Show the differences of the resultant committed changes in a branch since it forked, plus any current");
+            ConsoleWriter.WriteInfo("         changes (staged or not).");
             ConsoleWriter.WriteInfo("");
             ConsoleWriter.WriteInfo("Options:");
             ConsoleWriter.WriteInfo("  -n, --name   Optional name for the patch file (used with 'save' command), otherwise the branch name is used.");
