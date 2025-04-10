@@ -36,13 +36,6 @@ namespace EyePatch
 
             ConsoleWriter.WriteInfo($"Parent Commit: {parentCommit.Sha}");
 
-            // Generate the diff based on the parent commit
-            var diffOptions = new CompareOptions();
-            var patch = repo.Diff.Compare<Patch>(
-                parentCommit.Tree,
-                currentBranch.Tip.Tree,
-                diffOptions);
-
             // Create a temporary folder to store original files
             var tempFolder = Path.Combine(Path.GetTempPath(), "EyePatch-Diff");
 
@@ -59,8 +52,20 @@ namespace EyePatch
                     parentCommit.Tree,
                     currentBranch.Tip.Tree);
 
+            if (changes is null)
+            {
+                ConsoleWriter.WriteWarning("No changes to diff.");
+                return;
+            }
+
+            if (changes.Count == 0)
+            {
+                ConsoleWriter.WriteWarning("No changes to diff.");
+                return;
+            }
+
             List<string> modifiedFiles = [];
-            ConsoleWriter.WriteInfo($"\nFiles ({patch.Count()}):\n");
+            ConsoleWriter.WriteInfo($"\nFiles ({changes.Count}):\n");
             foreach (var change in changes)
             {
                 if (change.Status is ChangeKind.Modified or ChangeKind.Added or ChangeKind.Deleted)

@@ -76,7 +76,7 @@ namespace EyePatch
                 currentBranch.Tip.Tree,
                 diffOptions);
 
-            if (patch.Count() == 0)
+            if (!patch.Any())
             {
                 ConsoleWriter.WriteWarning("No changes to save.");
                 return;
