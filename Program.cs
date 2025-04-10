@@ -20,6 +20,7 @@ namespace EyePatch
             ConsoleWriter.WriteInfo("Commands:");
             ConsoleWriter.WriteInfo("  save   Save the resultant committed changes in a branch since it forked, plus any current changes (staged or not)");
             ConsoleWriter.WriteInfo("         producing a single patch. Optionally specify a name for the patch file.");
+            ConsoleWriter.WriteInfo("");
             ConsoleWriter.WriteInfo("  diff   Show the differences of the resultant committed changes in a branch since it forked, plus any current");
             ConsoleWriter.WriteInfo("         changes (staged or not).");
             ConsoleWriter.WriteInfo("");

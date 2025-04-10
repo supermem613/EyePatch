@@ -75,6 +75,8 @@ namespace EyePatch
                 }
             }
 
+            ConsoleWriter.WriteInfo("");
+
             var workingDirectory = Path.GetDirectoryName(repoPath) ?? string.Empty;
             if (string.IsNullOrEmpty(workingDirectory))
             {
@@ -103,6 +105,17 @@ namespace EyePatch
                     {
                         ConsoleWriter.WriteWarning($"Skipping {modifiedFile}, as no original version found.");
                         continue;
+                    }
+
+                    // Check if the two files are identical
+                    if (File.Exists(currentFilePath))
+                    {
+                        var currentFileContent = File.ReadAllText(currentFilePath);
+                        if (originalBlob.GetContentText() == currentFileContent)
+                        {
+                            ConsoleWriter.WriteWarning($"Skipping {modifiedFile} as it is identical (changes were reverted).");
+                            continue;
+                        }
                     }
 
                     diffFilePairs.Add($"{tempFilePath} {currentFilePath}");
