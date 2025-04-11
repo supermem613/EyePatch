@@ -28,7 +28,7 @@ namespace EyePatch
                 var patchContent = File.ReadAllText(patchFilePath);
 
                 // Parse the patch file
-                var patchParser = new PatchParser(patchContent);
+                var patchParser = new FilePatchParser(patchContent);
                 var patches = patchParser.Parse();
 
                 // Open the repository
@@ -56,7 +56,7 @@ namespace EyePatch
                     File.WriteAllText(baseFilePath, blob.GetContentText());
 
                     // Apply the patch to create the patched version
-                    var patchedContent = PatchApplier.Apply(blob.GetContentText(), patch.DiffContent);
+                    var patchedContent = FilePatchApplier.Apply(blob.GetContentText(), patch.DiffContent);
 
                     // Write the patched content to another temporary file
                     var patchedFilePath = Path.Combine(tempFolder, "patched_" + Path.GetFileName(patch.BaseFilePath));
@@ -98,7 +98,7 @@ namespace EyePatch
         }
     }
 
-    internal class PatchParser(string patchContent)
+    internal class FilePatchParser(string patchContent)
     {
         private readonly string _patchContent = patchContent;
 
@@ -124,7 +124,7 @@ namespace EyePatch
                     var parts = line.Split(' ');
                     if (parts.Length >= 3)
                     {
-                        var baseFilePath = parts[2].Substring(2); // Remove the "a/" prefix
+                        var baseFilePath = parts[2][2..]; // Remove the "a/" prefix
                         currentPatch = new FilePatch { BaseFilePath = baseFilePath };
                     }
                 }
@@ -165,13 +165,13 @@ namespace EyePatch
         }
     }
 
-    internal static class PatchApplier
+    internal static class FilePatchApplier
     {
         public static string Apply(string baseContent, string diffContent)
         {
             // Split the diff content into lines
-            var diffLines = diffContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
-            var baseLines = baseContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None).ToList();
+            var diffLines = diffContent.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
+            var baseLines = baseContent.Split(["\r\n", "\r", "\n"], StringSplitOptions.None).ToList();
 
             // Queue to store modifications (additions and removals)
             var modifications = new Dictionary<int, List<string>>();
