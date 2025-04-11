@@ -182,17 +182,19 @@ namespace EyePatch
                 if (line.StartsWith("@@")) // Hunk header
                 {
                     // Parse the hunk header to get the line numbers
-                    var hunkInfo = ParseHunkHeader(line);
-                    currentIndex = hunkInfo.BaseStartLine - 1; // Convert to zero-based index
+                    var (baseStartLine, _, _, _) = ParseHunkHeader(line);
+                    currentIndex = baseStartLine - 1; // Convert to zero-based index
                 }
-                else if (line.StartsWith("-")) // Line to remove
+                else if (line.StartsWith('-')) // Line to remove
                 {
                     // Queue the removal of the line
-                    if (!modifications.ContainsKey(currentIndex))
+                    if (!modifications.TryGetValue(currentIndex, out var value))
                     {
-                        modifications[currentIndex] = [];
+                        value = [];
+                        modifications[currentIndex] = value;
                     }
-                    modifications[currentIndex].Add(null); // Null indicates a removal
+
+                    value.Add(null); // Null indicates a removal
                     currentIndex++;
                 }
                 else if (line.StartsWith('+')) // Line to add
