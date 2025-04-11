@@ -174,7 +174,7 @@ namespace EyePatch
             var baseLines = baseContent.Split(["\r\n", "\r", "\n"], StringSplitOptions.None).ToList();
 
             // Queue to store modifications (additions and removals)
-            var modifications = new Dictionary<int, List<string>>();
+            var modifications = new Dictionary<int, List<string?>>();
             var currentIndex = 0;
 
             foreach (var line in diffLines)
@@ -190,7 +190,7 @@ namespace EyePatch
                     // Queue the removal of the line
                     if (!modifications.ContainsKey(currentIndex))
                     {
-                        modifications[currentIndex] = new List<string>();
+                        modifications[currentIndex] = [];
                     }
                     modifications[currentIndex].Add(null); // Null indicates a removal
                     currentIndex++;
@@ -198,11 +198,13 @@ namespace EyePatch
                 else if (line.StartsWith("+")) // Line to add
                 {
                     // Queue the addition of the line
-                    if (!modifications.ContainsKey(currentIndex))
+                    if (!modifications.TryGetValue(currentIndex, out var value))
                     {
-                        modifications[currentIndex] = new List<string>();
+                        value = [];
+                        modifications[currentIndex] = value;
                     }
-                    modifications[currentIndex].Add(line.Substring(1)); // Add the new line
+
+                    value.Add(line[1..]); // Add the new line
                 }
                 else // Context line
                 {
@@ -218,9 +220,9 @@ namespace EyePatch
             for (var i = 0; i < baseLines.Count || modifications.ContainsKey(currentIndex); i++)
             {
                 // Apply queued modifications at the current index
-                if (modifications.ContainsKey(currentIndex))
+                if (modifications.TryGetValue(currentIndex, out var value))
                 {
-                    foreach (var modification in modifications[currentIndex])
+                    foreach (var modification in value)
                     {
                         if (modification != null)
                         {
