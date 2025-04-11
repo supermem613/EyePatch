@@ -195,7 +195,7 @@ namespace EyePatch
                     modifications[currentIndex].Add(null); // Null indicates a removal
                     currentIndex++;
                 }
-                else if (line.StartsWith("+")) // Line to add
+                else if (line.StartsWith('+')) // Line to add
                 {
                     // Queue the addition of the line
                     if (!modifications.TryGetValue(currentIndex, out var value))
@@ -238,10 +238,7 @@ namespace EyePatch
                 }
 
                 // Clear modifications for this index after processing
-                if (modifications.ContainsKey(currentIndex))
-                {
-                    modifications.Remove(currentIndex);
-                }
+                modifications.Remove(currentIndex);
 
                 currentIndex++;
             }
