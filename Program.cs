@@ -16,14 +16,16 @@ namespace EyePatch
         private static void ShowHelp()
         {
             ConsoleWriter.WriteInfo("Usage: EyePatch <command> [options]");
-            ConsoleWriter.WriteInfo("");
+            ConsoleWriter.WriteNewLine();
             ConsoleWriter.WriteInfo("Commands:");
             ConsoleWriter.WriteInfo("  save   Save the resultant committed changes in a branch since it forked, plus any current changes (staged or not)");
             ConsoleWriter.WriteInfo("         producing a single patch. Optionally specify a name for the patch file.");
-            ConsoleWriter.WriteInfo("");
+            ConsoleWriter.WriteNewLine();
             ConsoleWriter.WriteInfo("  diff   Show the differences of the resultant committed changes in a branch since it forked, plus any current");
             ConsoleWriter.WriteInfo("         changes (staged or not).");
-            ConsoleWriter.WriteInfo("");
+            ConsoleWriter.WriteNewLine();
+            ConsoleWriter.WriteInfo("  view   Show the differences of a given patch file against its base commit");
+            ConsoleWriter.WriteNewLine();
             ConsoleWriter.WriteInfo("Options:");
             ConsoleWriter.WriteInfo("  -n, --name   Optional name for the patch file (used with 'save' command), otherwise the branch name is used.");
         }
@@ -48,6 +50,10 @@ namespace EyePatch
                     else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
                     {
                         Diff.Execute();
+                    }
+                    else if (options.Command.Equals("view", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        View.Execute(options.Name);
                     }
                     else
                     {

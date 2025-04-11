@@ -75,7 +75,7 @@ namespace EyePatch
                 }
             }
 
-            ConsoleWriter.WriteInfo("");
+            ConsoleWriter.WriteNewLine();
 
             var workingDirectory = Path.GetDirectoryName(repoPath) ?? string.Empty;
             if (string.IsNullOrEmpty(workingDirectory))

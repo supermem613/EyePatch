@@ -33,6 +33,11 @@ namespace EyePatch
             WriteColoredText(text, ConsoleColor.White);
         }
 
+        public static void WriteNewLine()
+        {
+            Console.WriteLine("");
+        }
+
         private static void WriteColoredText(string text, ConsoleColor color)
         {
             Console.ForegroundColor = color;
