@@ -98,19 +98,14 @@ namespace EyePatch
         }
     }
 
-    internal class PatchParser
+    internal class PatchParser(string patchContent)
     {
-        private readonly string _patchContent;
-
-        public PatchParser(string patchContent)
-        {
-            _patchContent = patchContent;
-        }
+        private readonly string _patchContent = patchContent;
 
         public List<FilePatch> Parse()
         {
             var patches = new List<FilePatch>();
-            var lines = _patchContent.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var lines = _patchContent.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
 
             FilePatch? currentPatch = null;
             var diffContentBuilder = new StringBuilder();
@@ -220,7 +215,7 @@ namespace EyePatch
             var patchedLines = new List<string>();
             currentIndex = 0;
 
-            for (int i = 0; i < baseLines.Count || modifications.ContainsKey(currentIndex); i++)
+            for (var i = 0; i < baseLines.Count || modifications.ContainsKey(currentIndex); i++)
             {
                 // Apply queued modifications at the current index
                 if (modifications.ContainsKey(currentIndex))
@@ -256,8 +251,8 @@ namespace EyePatch
         {
             // Example hunk header: @@ -3,7 +3,8 @@
             var parts = hunkHeader.Split(' ');
-            var baseInfo = parts[1].Substring(1).Split(',');
-            var targetInfo = parts[2].Substring(1).Split(',');
+            var baseInfo = parts[1][1..].Split(',');
+            var targetInfo = parts[2][1..].Split(',');
 
             var baseStartLine = int.Parse(baseInfo[0]);
             var baseLineCount = baseInfo.Length > 1 ? int.Parse(baseInfo[1]) : 1;
@@ -271,7 +266,7 @@ namespace EyePatch
 
     internal class FilePatch
     {
-        public string BaseFilePath { get; set; } = string.Empty;
+        public string BaseFilePath { get; init; } = string.Empty;
         public string BaseIndex { get; set; } = string.Empty; // Add this to store the base index hash
         public string DiffContent { get; set; } = string.Empty;
     }
