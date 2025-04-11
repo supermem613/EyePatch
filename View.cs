@@ -41,6 +41,8 @@ namespace EyePatch
 
                 using var repo = new Repository(repoPath);
 
+                List<string> diffFilePairs = [];
+
                 foreach (var patch in patches)
                 {
                     // Get the base file content using the index hash
@@ -62,26 +64,28 @@ namespace EyePatch
                     var patchedFilePath = Path.Combine(tempFolder, "patched_" + Path.GetFileName(patch.BaseFilePath));
                     File.WriteAllText(patchedFilePath, patchedContent);
 
-                    // Perform a diff between the base and patched versions
-                    ConsoleWriter.WriteInfo($"Diffing {baseFilePath} against {patchedFilePath}...");
-                    var diffProcess = new Process
-                    {
-                        StartInfo = new ProcessStartInfo
-                        {
-                            FileName = "cmd.exe",
-                            Arguments = $"/c sdvdiff \"{baseFilePath}\" \"{patchedFilePath}\"",
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true,
-                            RedirectStandardError = true,
-                            CreateNoWindow = true
-                        }
-                    };
-
-                    diffProcess.Start();
-                    Console.WriteLine(diffProcess.StandardOutput.ReadToEnd());
-                    Console.WriteLine(diffProcess.StandardError.ReadToEnd());
-                    diffProcess.WaitForExit();
+                    diffFilePairs.Add($"{baseFilePath} {patchedFilePath}");
                 }
+
+                // Write the file pairs to a temporary file
+                var diffFileListPath = Path.Combine(tempFolder, "diffFileList.txt");
+                File.WriteAllLines(diffFileListPath, diffFilePairs);
+
+                var process = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/c type \"{diffFileListPath}\" | sdvdiff -i-",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    }
+                };
+
+                ConsoleWriter.WriteSuccess($"\nAll done. Waiting on diff window to close...");
+
+                process.Start();
+                process.WaitForExit();
             }
             catch (Exception ex)
             {
