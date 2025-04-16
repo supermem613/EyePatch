@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text;
 using LibGit2Sharp;
 
@@ -6,7 +5,7 @@ namespace EyePatch
 {
     internal static class View
     {
-        public static void Execute(string patchFilePath)
+        public static void Execute(string patchFilePath, Settings settings)
         {
             if (!File.Exists(patchFilePath))
             {
@@ -20,6 +19,7 @@ namespace EyePatch
             {
                 Directory.Delete(tempFolder, true);
             }
+
             Directory.CreateDirectory(tempFolder);
 
             try
@@ -67,25 +67,10 @@ namespace EyePatch
                     diffFilePairs.Add($"{baseFilePath} {patchedFilePath}");
                 }
 
-                // Write the file pairs to a temporary file
-                var diffFileListPath = Path.Combine(tempFolder, "diffFileList.txt");
-                File.WriteAllLines(diffFileListPath, diffFilePairs);
-
-                var process = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "cmd.exe",
-                        Arguments = $"/c type \"{diffFileListPath}\" | sdvdiff -i-",
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                    }
-                };
-
-                ConsoleWriter.WriteSuccess($"\nAll done. Waiting on diff window to close...");
-
-                process.Start();
-                process.WaitForExit();
+                DiffLauncher.LaunchDiffTool(
+                    settings,
+                    tempFolder,
+                    diffFilePairs);
             }
             catch (Exception ex)
             {

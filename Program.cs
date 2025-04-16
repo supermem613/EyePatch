@@ -28,10 +28,16 @@ namespace EyePatch
             ConsoleWriter.WriteNewLine();
             ConsoleWriter.WriteInfo("Options:");
             ConsoleWriter.WriteInfo("  -n, --name   Optional name for the patch file (used with 'save' command), otherwise the branch name is used.");
+            ConsoleWriter.WriteNewLine();
+            ConsoleWriter.WriteInfo("Settings:");
+            ConsoleWriter.WriteInfo("  Configured in the .eyepatch.settings file in your user folder, as a JSON file.");
+            ConsoleWriter.WriteInfo("     DiffApp: The diff application to use (default: windiff).");
+            ConsoleWriter.WriteNewLine();
         }
 
         public static void Main(string[] args)
         {
+            var settings = Settings.Load();
             if (args.Length == 0)
             {
                 ShowHelp();
@@ -45,15 +51,15 @@ namespace EyePatch
 
                     if (options.Command.Equals("save", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        Save.Execute(options.Name);
+                        Save.Execute(options.Name, settings);
                     }
                     else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        Diff.Execute();
+                        Diff.Execute(settings);
                     }
                     else if (options.Command.Equals("view", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        View.Execute(options.Name);
+                        View.Execute(options.Name, settings);
                     }
                     else
                     {

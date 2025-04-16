@@ -5,7 +5,7 @@ namespace EyePatch
 {
     internal static class Diff
     {
-        public static void Execute()
+        public static void Execute(Settings settings)
         {
             // Set the path to the repository
             var repoPath = Path.GetDirectoryName(Repository.Discover(Environment.CurrentDirectory));
@@ -126,25 +126,10 @@ namespace EyePatch
                 }
             }
 
-            // Write the file pairs to a temporary file
-            var diffFileListPath = Path.Combine(tempFolder, "diffFileList.txt");
-            File.WriteAllLines(diffFileListPath, diffFilePairs);
-
-            var process = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "cmd.exe",
-                    Arguments = $"/c type \"{diffFileListPath}\" | sdvdiff -i-",
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                }
-            };
-
-            ConsoleWriter.WriteSuccess($"\nAll done. Waiting on diff window to close...");
-
-            process.Start();
-            process.WaitForExit();
+            DiffLauncher.LaunchDiffTool(
+                settings,
+                tempFolder,
+                diffFilePairs);
 
             // Clean up the temporary folder
             if (Directory.Exists(tempFolder))

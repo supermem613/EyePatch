@@ -27,7 +27,7 @@ namespace EyePatch
             return patchesPath;
         }
         
-        public static void Execute(string patchFileName)
+        public static void Execute(string patchFileName, Settings settings)
         {
             // Set the path to the repository
             var repoPath = Repository.Discover(Environment.CurrentDirectory);
