@@ -178,7 +178,12 @@ namespace EyePatch
                 {
                     // Parse the hunk header to get the line numbers
                     var (baseStartLine, _, _, _) = ParseHunkHeader(line);
-                    currentIndex = baseStartLine - 1; // Convert to zero-based index
+
+                    // Zero is a special case when we are removing / inserting at the top of the file.
+                    if (baseStartLine != 0)
+                    {
+                        currentIndex = baseStartLine - 1; // Convert to zero-based index
+                    }
                 }
                 else if (line.StartsWith('-')) // Line to remove
                 {

@@ -8,16 +8,17 @@ namespace test
         [TestMethod]
         public void FilePatchParser_ParsesSinglePatchCorrectly()
         {
-            string patch = """
-diff --git a/foo.txt b/foo.txt
-index 1234567..89abcde 100644
---- a/foo.txt
-+++ b/foo.txt
-@@ -1,2 +1,2 @@
--old line
-+new line
- unchanged
-""";
+            const string patch = """
+                                 diff --git a/foo.txt b/foo.txt
+                                 index 1234567..89abcde 100644
+                                 --- a/foo.txt
+                                 +++ b/foo.txt
+                                 @@ -1,2 +1,2 @@
+                                 -old line
+                                 +new line
+                                  unchanged
+                                 """;
+
             var parser = new FilePatchParser(patch);
             var patches = parser.Parse();
             Assert.AreEqual(1, patches.Count);
@@ -29,20 +30,110 @@ index 1234567..89abcde 100644
         [TestMethod]
         public void FilePatchApplier_AppliesSimplePatchCorrectly()
         {
-            string baseContent = "old line\nunchanged";
-            string diffContent = "@@ -1,2 +1,2 @@\n-old line\n+new line\n unchanged";
-            string expected = "new line\nunchanged";
-            string result = FilePatchApplier.Apply(baseContent, diffContent);
+            const string baseContent = "old line\nunchanged";
+            const string diffContent = "@@ -1,2 +1,2 @@\n-old line\n+new line\n unchanged";
+            const string expected = "new line\nunchanged";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
             Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
         }
 
         [TestMethod]
         public void FilePatchApplier_AppliesAdditionAndRemoval()
         {
-            string baseContent = "a\nb\nc";
-            string diffContent = "@@ -2,2 +2,3 @@\n-b\n+c\n+d";
-            string expected = "a\nc\nd";
-            string result = FilePatchApplier.Apply(baseContent, diffContent);
+            const string baseContent = "a\nb\nc";
+            const string diffContent = "@@ -2,2 +2,3 @@\n-b\n+c\n+d";
+            const string expected = "a\nc\nd\nc";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
+            Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
+        }
+
+        [TestMethod]
+        public void FilePatchApplier_InsertsLineInMiddle()
+        {
+            const string baseContent = "line1\nline2\nline3\nline4\nline5";
+            const string diffContent = "@@ -3,2 +3,3 @@\n line3\n+new line\n line4";
+            const string expected = "line1\nline2\nline3\nnew line\nline4\nline5";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
+            Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
+        }
+
+        [TestMethod]
+        public void FilePatchApplier_InsertsLineAtTop()
+        {
+            const string baseContent = "line1\nline2\nline3";
+            const string diffContent = "@@ -0,0 +1,1 @@\n+new line";
+            const string expected = "new line\nline1\nline2\nline3";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
+            Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
+        }
+
+        [TestMethod]
+        public void FilePatchApplier_InsertsLineAtBottom()
+        {
+            const string baseContent = "line1\nline2\nline3";
+            const string diffContent = "@@ -3,1 +3,2 @@\n line3\n+new line";
+            const string expected = "line1\nline2\nline3\nnew line";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
+            Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
+        }
+
+        [TestMethod]
+        public void FilePatchApplier_RemovesTopLine()
+        {
+            const string baseContent = "line1\nline2\nline3\nline4\nline5";
+            const string diffContent = "@@ -1,1 +0,0 @@\n-line1";
+            const string expected = "line2\nline3\nline4\nline5";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
+            Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
+        }
+
+        [TestMethod]
+        public void FilePatchApplier_RemovesMiddleLine()
+        {
+            const string baseContent = "line1\nline2\nline3\nline4\nline5";
+            const string diffContent = "@@ -3,1 +0,0 @@\n-line3";
+            const string expected = "line1\nline2\nline4\nline5";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
+            Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
+        }
+
+        [TestMethod]
+        public void FilePatchApplier_RemovesBottomLine()
+        {
+            const string baseContent = "line1\nline2\nline3\nline4\nline5";
+            const string diffContent = "@@ -5,1 +0,0 @@\n-line5";
+            const string expected = "line1\nline2\nline3\nline4";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
+            Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
+        }
+
+        [TestMethod]
+        public void FilePatchApplier_RemovesAndInsertsTopLine()
+        {
+            const string baseContent = "line1\nline2\nline3\nline4\nline5";
+            const string diffContent = "@@ -1,1 +1,1 @@\n-line1\n+new line";
+            const string expected = "new line\nline2\nline3\nline4\nline5";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
+            Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
+        }
+
+        [TestMethod]
+        public void FilePatchApplier_RemovesAndInsertsMiddleLine()
+        {
+            const string baseContent = "line1\nline2\nline3\nline4\nline5";
+            const string diffContent = "@@ -3,1 +3,1 @@\n-line3\n+new line";
+            const string expected = "line1\nline2\nnew line\nline4\nline5";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
+            Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
+        }
+
+        [TestMethod]
+        public void FilePatchApplier_RemovesAndInsertsBottomLine()
+        {
+            const string baseContent = "line1\nline2\nline3\nline4\nline5";
+            const string diffContent = "@@ -5,1 +5,1 @@\n-line5\n+new line";
+            const string expected = "line1\nline2\nline3\nline4\nnew line";
+            var result = FilePatchApplier.Apply(baseContent, diffContent);
             Assert.AreEqual(expected.Replace("\n", Environment.NewLine), result);
         }
     }
