@@ -51,7 +51,7 @@ namespace EyePatch
 
                     if (options.Command.Equals("save", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        Save.Execute(options.Name, settings);
+                        Save.Execute(options.Name);
                     }
                     else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
                     {
