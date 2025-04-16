@@ -6,17 +6,16 @@ namespace EyePatch
     {
         public static void Execute(string patchFileName, Settings settings)
         {
-            // Set the path to the repository
-            var repoPath = Repository.Discover(Environment.CurrentDirectory);
-
-            if (repoPath == null)
+            IRepository repo;
+            try
             {
-                ConsoleWriter.WriteError("Not inside a Git repository.");
+                repo = new Repository(Environment.CurrentDirectory);
+            }
+            catch (LibGit2Sharp.RepositoryNotFoundException)
+            {
+                ConsoleWriter.WriteError("Not in a Git repository.");
                 return;
             }
-
-            // Open the repository
-            using var repo = new Repository(repoPath);
 
             // Get the current branch
             var currentBranch = repo.Head;

@@ -4,32 +4,28 @@ namespace EyePatch
 {
     public class Settings
     {
-        public string DiffApp { get; init; } = "windiff";
+        public string DiffApp { get; set; }
         public string? PatchDirectory { get; init; }
 
         private static readonly string SettingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".eyepatch.settings");
 
         public static Settings Load()
         {
+            Settings settings;
+
             if (File.Exists(SettingsFilePath))
             {
                 var json = File.ReadAllText(SettingsFilePath);
-                return JsonSerializer.Deserialize<Settings>(json) ?? new Settings();
+                settings = JsonSerializer.Deserialize<Settings>(json) ?? new Settings();
             }
-
-            return new Settings();
-        }
-
-        public void Save()
-        {
-            var directory = Path.GetDirectoryName(SettingsFilePath);
-            if (directory != null && !Directory.Exists(directory))
+            else
             {
-                Directory.CreateDirectory(directory);
+                settings = new Settings();
             }
 
-            var json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(SettingsFilePath, json);
+            settings.DiffApp ??= "windiff";
+
+            return settings;
         }
     }
 }

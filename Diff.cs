@@ -7,17 +7,16 @@ namespace EyePatch
     {
         public static void Execute(Settings settings)
         {
-            // Set the path to the repository
-            var repoPath = Path.GetDirectoryName(Repository.Discover(Environment.CurrentDirectory));
-
-            if (repoPath == null)
+            IRepository repo;
+            try
             {
-                ConsoleWriter.WriteError("Not inside a Git repository.");
+                repo = new Repository(Environment.CurrentDirectory);
+            }
+            catch (LibGit2Sharp.RepositoryNotFoundException)
+            {
+                ConsoleWriter.WriteError("Not in a Git repository.");
                 return;
             }
-
-            // Open the repository
-            using var repo = new Repository(repoPath);
 
             // Get the current branch
             var currentBranch = repo.Head;
@@ -77,13 +76,6 @@ namespace EyePatch
 
             ConsoleWriter.WriteNewLine();
 
-            var workingDirectory = Path.GetDirectoryName(repoPath) ?? string.Empty;
-            if (string.IsNullOrEmpty(workingDirectory))
-            {
-                ConsoleWriter.WriteError("Working directory not found.");
-                return;
-            }
-
             List<string> diffFilePairs = [];
 
             foreach (var modifiedFile in modifiedFiles)
@@ -93,7 +85,7 @@ namespace EyePatch
                     var tempFilePath =
                         Path.Combine(tempFolder, modifiedFile.Replace("/", "_"));
                     var currentFilePath =
-                        Path.Combine(workingDirectory, modifiedFile.Replace("/", "\\"));
+                        Path.Combine(repo.Info.WorkingDirectory, modifiedFile.Replace("/", "\\"));
 
                     // Extract the original file content to a temp file
                     var originalBlob = parentCommit[modifiedFile]?.Target as Blob;

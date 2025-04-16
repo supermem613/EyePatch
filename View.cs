@@ -37,15 +37,16 @@ namespace EyePatch
                 var patchParser = new FilePatchParser(patchContent);
                 var patches = patchParser.Parse();
 
-                // Open the repository
-                var repoPath = Repository.Discover(Environment.CurrentDirectory);
-                if (repoPath == null)
+                IRepository repo;
+                try
                 {
-                    ConsoleWriter.WriteError("Not inside a Git repository.");
+                    repo = new Repository(Environment.CurrentDirectory);
+                }
+                catch (LibGit2Sharp.RepositoryNotFoundException)
+                {
+                    ConsoleWriter.WriteError("Not in a Git repository.");
                     return;
                 }
-
-                using var repo = new Repository(repoPath);
 
                 List<string> diffFilePairs = [];
 
