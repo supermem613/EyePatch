@@ -37,7 +37,7 @@ namespace EyePatch
             ConsoleWriter.WriteInfo($"Parent Commit: {parentCommit.Sha}");
 
             // Create a temporary folder to store original files
-            var tempFolder = Path.Combine(Path.GetTempPath(), "EyePatch-Diff");
+            var tempFolder = Path.Combine(Path.GetTempPath(), $"EyePatch-Diff-{Guid.NewGuid()}");
 
             // Clear the directory if it already exists
             if (Directory.Exists(tempFolder))

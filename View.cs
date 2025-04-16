@@ -14,7 +14,7 @@ namespace EyePatch
             }
 
             // Create a temporary folder to store the base and patched files
-            var tempFolder = Path.Combine(Path.GetTempPath(), "EyePatch-View");
+            var tempFolder = Path.Combine(Path.GetTempPath(), $"EyePatch-View-{Guid.NewGuid()}");
             if (Directory.Exists(tempFolder))
             {
                 Directory.Delete(tempFolder, true);
