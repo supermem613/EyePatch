@@ -12,6 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="EyePatch.Tests\**" />
+    <EmbeddedResource Remove="EyePatch.Tests\**" />
+    <None Remove="EyePatch.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
   </ItemGroup>
