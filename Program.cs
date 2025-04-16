@@ -9,7 +9,7 @@ namespace EyePatch
             [Value(0, MetaName = "command", Required = true, HelpText = "The command to execute (e.g., save).")]
             public required string Command { get; set; }
 
-            [Option('n', "name", Required = false, HelpText = "Optional name for the patch file.")]
+            [Value(1, MetaName = "name", Required = false, HelpText = "Optional name for the patch file.")]
             public required string Name { get; set; }
         }
         
@@ -24,10 +24,7 @@ namespace EyePatch
             ConsoleWriter.WriteInfo("  diff   Show the differences of the resultant committed changes in a branch since it forked, plus any current");
             ConsoleWriter.WriteInfo("         changes (staged or not).");
             ConsoleWriter.WriteNewLine();
-            ConsoleWriter.WriteInfo("  view   Show the differences of a given patch file against its base commit");
-            ConsoleWriter.WriteNewLine();
-            ConsoleWriter.WriteInfo("Options:");
-            ConsoleWriter.WriteInfo("  -n, --name   Optional name for the patch file (used with 'save' command), otherwise the branch name is used.");
+            ConsoleWriter.WriteInfo("  view   Show the differences of a given patch file against its base commit. Requires a name argument.");
             ConsoleWriter.WriteNewLine();
             ConsoleWriter.WriteInfo("Settings:");
             ConsoleWriter.WriteInfo("  Configured in the .eyepatch.settings file in your user folder, as a JSON file.");

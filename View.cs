@@ -7,6 +7,12 @@ namespace EyePatch
     {
         public static void Execute(string patchFilePath, Settings settings)
         {
+            if (string.IsNullOrEmpty(patchFilePath))
+            {
+                ConsoleWriter.WriteError("Patch file path is required.");
+                return;
+            }
+
             if (!File.Exists(patchFilePath))
             {
                 ConsoleWriter.WriteError($"Patch file not found: {patchFilePath}");
