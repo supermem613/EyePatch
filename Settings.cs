@@ -5,6 +5,7 @@ namespace EyePatch
     public class Settings
     {
         public string DiffApp { get; init; } = "windiff";
+        public string? PatchDirectory { get; init; }
 
         private static readonly string SettingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".eyepatch.settings");
 

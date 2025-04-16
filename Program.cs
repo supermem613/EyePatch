@@ -29,6 +29,7 @@ namespace EyePatch
             ConsoleWriter.WriteInfo("Settings:");
             ConsoleWriter.WriteInfo("  Configured in the .eyepatch.settings file in your user folder, as a JSON file.");
             ConsoleWriter.WriteInfo("     DiffApp: The diff application to use (default: windiff).");
+            ConsoleWriter.WriteInfo("     PatchDirectory: The directory where patches are saved (default: OneDrive\\patches).");
             ConsoleWriter.WriteNewLine();
         }
 
@@ -48,7 +49,7 @@ namespace EyePatch
 
                     if (options.Command.Equals("save", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        Save.Execute(options.Name);
+                        Save.Execute(options.Name, settings);
                     }
                     else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
                     {

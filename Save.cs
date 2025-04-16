@@ -4,30 +4,7 @@ namespace EyePatch
 {
     internal static class Save
     {
-        private static string EnsurePatchesDirectoryExists()
-        {
-            // Retrieve the OneDrive path from the environment variable
-            var oneDrivePath = Environment.GetEnvironmentVariable("OneDrive");
-
-            if (string.IsNullOrEmpty(oneDrivePath))
-            {
-                throw new InvalidOperationException("OneDrive is not configured on this system.");
-            }
-
-            // Construct the full path to the "patches" directory
-            var patchesPath = Path.Combine(oneDrivePath, "patches");
-
-            // Ensure the "patches" directory exists
-            if (!Directory.Exists(patchesPath))
-            {
-                Directory.CreateDirectory(patchesPath);
-            }
-
-            // Return the full path
-            return patchesPath;
-        }
-        
-        public static void Execute(string patchFileName)
+        public static void Execute(string patchFileName, Settings settings)
         {
             // Set the path to the repository
             var repoPath = Repository.Discover(Environment.CurrentDirectory);
@@ -88,7 +65,7 @@ namespace EyePatch
             }
 
             patchFileName = Path.Combine(
-                EnsurePatchesDirectoryExists(),
+                PatchDirectory.EnsurePatchesDirectoryExists(settings),
                 string.Concat(
                     patchFileName,
                     ".",
