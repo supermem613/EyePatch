@@ -1,6 +1,6 @@
 using EyePatch;
 
-namespace test
+namespace EyePatch.Tests
 {
     [TestClass]
     public class DiffTests
