@@ -18,13 +18,7 @@ namespace EyePatch
             }
 
             // Create a temporary folder to store the base and patched files
-            var tempFolder = Path.Combine(Path.GetTempPath(), $"EyePatch-View-{Guid.NewGuid()}");
-            if (Directory.Exists(tempFolder))
-            {
-                Directory.Delete(tempFolder, true);
-            }
-
-            Directory.CreateDirectory(tempFolder);
+            var tempFolder = CreateTempFolder();
 
             try
             {
@@ -58,14 +52,14 @@ namespace EyePatch
 
                     // Write the base file content to a temporary file
                     var baseFilePath = Path.Combine(tempFolder, Path.GetFileName(patch.BaseFilePath));
-                    File.WriteAllText(baseFilePath, blob.GetContentText());
+                    WriteBaseBlobToFile(baseFilePath, blob);
 
                     // Apply the patch to create the patched version
                     var patchedContent = FilePatchApplier.Apply(blob.GetContentText(), patch.DiffContent);
 
                     // Write the patched content to another temporary file
                     var patchedFilePath = Path.Combine(tempFolder, "patched_" + Path.GetFileName(patch.BaseFilePath));
-                    File.WriteAllText(patchedFilePath, patchedContent);
+                    WritePatchedBlobToFile(patchedFilePath, patchedContent);
 
                     diffFilePairs.Add($"{baseFilePath} {patchedFilePath}");
                 }
@@ -78,12 +72,40 @@ namespace EyePatch
             }
             finally
             {
-                // Clean up the temporary folder
-                if (Directory.Exists(tempFolder))
-                {
-                    Directory.Delete(tempFolder, true);
-                }
+                DeleteTempFolder(tempFolder);
             }
+        }
+
+        internal virtual void DeleteTempFolder(string tempFolder)
+        {
+            // Clean up the temporary folder
+            if (Directory.Exists(tempFolder))
+            {
+                Directory.Delete(tempFolder, true);
+            }
+        }
+
+        internal virtual string CreateTempFolder()
+        {
+            var tempFolder = Path.Combine(Path.GetTempPath(), $"EyePatch-View-{Guid.NewGuid()}");
+            if (Directory.Exists(tempFolder))
+            {
+                Directory.Delete(tempFolder, true);
+            }
+
+            Directory.CreateDirectory(tempFolder);
+
+            return tempFolder;
+        }
+
+        internal virtual void WritePatchedBlobToFile(string patchedFilePath, string patchedContent)
+        {
+            File.WriteAllText(patchedFilePath, patchedContent);
+        }
+
+        internal virtual void WriteBaseBlobToFile(string baseFilePath, Blob blob)
+        {
+            File.WriteAllText(baseFilePath, blob.GetContentText());
         }
 
         internal virtual void LaunchDiffTool(Settings settings, string tempFolder, List<string> diffFilePairs)
