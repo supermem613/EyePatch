@@ -17,6 +17,15 @@ namespace EyePatch
                 throw new EyePatchException("Not in a Git repository.", e);
             }
 
+            ExecuteWithRepo(
+                settings,
+                repo);
+        }
+
+        internal void ExecuteWithRepo(
+            Settings settings,
+            IRepository repo)
+        {
             // Get the current branch
             var currentBranch = repo.Head;
             ConsoleWriter.WriteInfo($"Current Branch: {currentBranch.FriendlyName}");
@@ -34,15 +43,7 @@ namespace EyePatch
             ConsoleWriter.WriteInfo($"Parent Commit: {parentCommit.Sha}");
 
             // Create a temporary folder to store original files
-            var tempFolder = Path.Combine(Path.GetTempPath(), $"EyePatch-Diff-{Guid.NewGuid()}");
-
-            // Clear the directory if it already exists
-            if (Directory.Exists(tempFolder))
-            {
-                Directory.Delete(tempFolder, true);
-            }
-             
-            Directory.CreateDirectory(tempFolder);
+            var tempFolder = CreateTempFolder();
 
             // Find the list of modified files in the current branch
             var changes = repo.Diff.Compare<TreeChanges>(
@@ -89,7 +90,7 @@ namespace EyePatch
                     var originalBlob = parentCommit[modifiedFile]?.Target as Blob;
                     if (originalBlob != null)
                     {
-                        File.WriteAllText(tempFilePath, originalBlob.GetContentText());
+                        WriteBlobAsFile(tempFilePath, originalBlob);
                     }
                     else
                     {
@@ -97,15 +98,10 @@ namespace EyePatch
                         continue;
                     }
 
-                    // Check if the two files are identical
-                    if (File.Exists(currentFilePath))
+                    if (AreFilesIdentical(currentFilePath, originalBlob, modifiedFile))
                     {
-                        var currentFileContent = File.ReadAllText(currentFilePath);
-                        if (originalBlob.GetContentText() == currentFileContent)
-                        {
-                            ConsoleWriter.WriteWarning($"Skipping {modifiedFile} as it is identical (changes were reverted).");
-                            continue;
-                        }
+                        ConsoleWriter.WriteWarning($"Skipping {modifiedFile} as it is identical (changes were reverted).");
+                        continue;
                     }
 
                     diffFilePairs.Add($"{tempFilePath} {currentFilePath}");
@@ -116,16 +112,56 @@ namespace EyePatch
                 }
             }
 
-            DiffLauncher.LaunchDiffTool(
-                settings,
-                tempFolder,
-                diffFilePairs);
+            LaunchDiffTool(settings, tempFolder, diffFilePairs);
 
             // Clean up the temporary folder
             if (Directory.Exists(tempFolder))
             {
                 Directory.Delete(tempFolder, true);
             }
+        }
+
+        internal virtual bool AreFilesIdentical(string currentFilePath, Blob originalBlob, string modifiedFile)
+        {
+            // Check if the two files are identical
+            if (File.Exists(currentFilePath))
+            {
+                var currentFileContent = File.ReadAllText(currentFilePath);
+                if (originalBlob.GetContentText() == currentFileContent)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        internal virtual void WriteBlobAsFile(string tempFilePath, Blob originalBlob)
+        {
+            File.WriteAllText(tempFilePath, originalBlob.GetContentText());
+        }
+
+        internal virtual string CreateTempFolder()
+        {
+            var tempFolder = Path.Combine(Path.GetTempPath(), $"EyePatch-Diff-{Guid.NewGuid()}");
+
+            // Clear the directory if it already exists
+            if (Directory.Exists(tempFolder))
+            {
+                Directory.Delete(tempFolder, true);
+            }
+
+            Directory.CreateDirectory(tempFolder);
+
+            return tempFolder;
+        }
+
+        internal virtual void LaunchDiffTool(Settings settings, string tempFolder, List<string> diffFilePairs)
+        {
+            new DiffLauncher().LaunchDiffTool(
+                settings,
+                tempFolder,
+                diffFilePairs);
         }
     }
 }

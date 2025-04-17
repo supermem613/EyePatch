@@ -2,9 +2,9 @@ using System.Diagnostics;
 
 namespace EyePatch
 {
-    internal static class DiffLauncher
+    internal class DiffLauncher
     {
-        public static void LaunchDiffTool(
+        public virtual void LaunchDiffTool(
             Settings settings,
             string tempFolder,
             List<string> diffFilePairs)

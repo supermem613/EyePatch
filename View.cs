@@ -70,10 +70,7 @@ namespace EyePatch
                     diffFilePairs.Add($"{baseFilePath} {patchedFilePath}");
                 }
 
-                DiffLauncher.LaunchDiffTool(
-                    settings,
-                    tempFolder,
-                    diffFilePairs);
+                LaunchDiffTool(settings, tempFolder, diffFilePairs);
             }
             catch (Exception e)
             {
@@ -87,6 +84,14 @@ namespace EyePatch
                     Directory.Delete(tempFolder, true);
                 }
             }
+        }
+
+        internal virtual void LaunchDiffTool(Settings settings, string tempFolder, List<string> diffFilePairs)
+        {
+            new DiffLauncher().LaunchDiffTool(
+                settings,
+                tempFolder,
+                diffFilePairs);
         }
     }
 
