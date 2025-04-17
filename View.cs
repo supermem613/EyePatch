@@ -7,6 +7,16 @@ namespace EyePatch
     {
         public void Execute(string patchFilePath, Settings settings)
         {
+            Repository repo;
+            try
+            {
+                repo = new Repository(Environment.CurrentDirectory);
+            }
+            catch (LibGit2Sharp.RepositoryNotFoundException e)
+            {
+                throw new EyePatchException("Not in a Git repository.", e);
+            }
+
             if (string.IsNullOrEmpty(patchFilePath))
             {
                 throw new EyePatchException("Patch file path is required.");
@@ -17,38 +27,34 @@ namespace EyePatch
                 throw new EyePatchException($"Patch file not found: {patchFilePath}");
             }
 
+            // Read the patch file
+            var patchContent = File.ReadAllText(patchFilePath);
+
+            ExecuteWithRepo(
+                patchContent,
+                settings,
+                repo);
+        }
+
+        internal void ExecuteWithRepo(
+            string patchContent,
+            Settings settings,
+            IRepository repo)
+        {
             // Create a temporary folder to store the base and patched files
             var tempFolder = CreateTempFolder();
 
             try
             {
-                // Read the patch file
-                var patchContent = File.ReadAllText(patchFilePath);
-
                 // Parse the patch file
                 var patchParser = new FilePatchParser(patchContent);
                 var patches = patchParser.Parse();
-
-                IRepository repo;
-                try
-                {
-                    repo = new Repository(Environment.CurrentDirectory);
-                }
-                catch (LibGit2Sharp.RepositoryNotFoundException e)
-                {
-                    throw new EyePatchException("Not in a Git repository.", e);
-                }
 
                 List<string> diffFilePairs = [];
 
                 foreach (var patch in patches)
                 {
-                    // Get the base file content using the index hash
-                    var blob = repo.Lookup<Blob>(patch.BaseIndex);
-                    if (null == blob)
-                    {
-                        throw new EyePatchException($"Base file not found for {patch.BaseFilePath}.");
-                    }
+                    var blob = LookupBlobByIndexHash(repo, patch);
 
                     // Write the base file content to a temporary file
                     var baseFilePath = Path.Combine(tempFolder, Path.GetFileName(patch.BaseFilePath));
@@ -74,6 +80,18 @@ namespace EyePatch
             {
                 DeleteTempFolder(tempFolder);
             }
+        }
+
+        internal virtual Blob LookupBlobByIndexHash(IRepository repo, FilePatch patch)
+        {
+            // Get the base file content using the index hash
+            var blob = repo.Lookup<Blob>(patch.BaseIndex);
+            if (null == blob)
+            {
+                throw new EyePatchException($"Base file not found for {patch.BaseFilePath}.");
+            }
+
+            return blob;
         }
 
         internal virtual void DeleteTempFolder(string tempFolder)
