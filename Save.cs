@@ -2,21 +2,31 @@
 
 namespace EyePatch
 {
-    internal static class Save
+    internal class Save
     {
-        public static void Execute(string patchFileName, Settings settings)
+        public void Execute(string patchFileName, Settings settings)
         {
-            IRepository repo;
+            Repository repo;
             try
             {
                 repo = new Repository(Environment.CurrentDirectory);
             }
-            catch (LibGit2Sharp.RepositoryNotFoundException)
+            catch (LibGit2Sharp.RepositoryNotFoundException e)
             {
-                ConsoleWriter.WriteError("Not in a Git repository.");
-                return;
+                throw new EyePatchException("Not in a Git repository.", e);
             }
 
+            ExecuteWithRepo(
+                patchFileName,
+                settings,
+                repo);
+        }
+
+        internal void ExecuteWithRepo(
+            string patchFileName,
+            Settings settings,
+            IRepository repo)
+        {
             // Get the current branch
             var currentBranch = repo.Head;
             ConsoleWriter.WriteInfo($"Current Branch: {currentBranch.FriendlyName}");
@@ -37,10 +47,9 @@ namespace EyePatch
                 currentBranch.Tip,
                 repo.Branches["origin/main"].Tip);
 
-            if (parentCommit == null)
+            if (null == parentCommit)
             {
-                ConsoleWriter.WriteError("Could not determine the parent commit.");
-                return;
+                throw new EyePatchException("Could not determine the parent commit.");
             }
 
             ConsoleWriter.WriteInfo($"Parent Commit: {parentCommit.Sha}");
@@ -50,17 +59,19 @@ namespace EyePatch
                 parentCommit.Tree,
                 DiffTargets.Index | DiffTargets.WorkingDirectory);
 
-            if (!patch.Any())
-            {
-                ConsoleWriter.WriteWarning("No changes to save.");
-                return;
-            }
+            int count = 0;
 
-            ConsoleWriter.WriteInfo($"\nFiles ({patch.Count()}):");
             foreach (var entry in patch)
             {
                 ConsoleWriter.WriteInfo($"File: {entry.Path}");
                 ConsoleWriter.WriteInfo($"Status: {entry.Status}");
+                count++;
+            }
+
+            if (count == 0)
+            {
+                ConsoleWriter.WriteWarning("No changes to save.");
+                return;
             }
 
             patchFileName = Path.Combine(
@@ -71,6 +82,13 @@ namespace EyePatch
                     DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"),
                     ".patch"));
 
+            WriteAndVerifyPatchFile(patchFileName, patch);
+
+            ConsoleWriter.WriteSuccess($"\nPatch file written: \"{patchFileName}\"");
+        }
+
+        internal virtual void WriteAndVerifyPatchFile(string patchFileName, Patch patch)
+        {
             using (var writer = new StreamWriter(patchFileName))
             {
                 writer.Write(patch.Content);
@@ -78,11 +96,8 @@ namespace EyePatch
 
             if (!File.Exists(patchFileName) || new FileInfo(patchFileName).Length == 0)
             {
-                ConsoleWriter.WriteError("Patch file was not created or is empty.");
-                return;
+                throw new EyePatchException("Patch file was not created or is empty.");
             }
-
-            ConsoleWriter.WriteSuccess($"\nPatch file written: \"{patchFileName}\"");
         }
     }
 }

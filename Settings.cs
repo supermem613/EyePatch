@@ -4,7 +4,7 @@ namespace EyePatch
 {
     public class Settings
     {
-        public string DiffApp { get; set; }
+        public string? DiffApp { get; set; }
         public string? PatchDirectory { get; init; }
 
         private static readonly string SettingsFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".eyepatch.settings");

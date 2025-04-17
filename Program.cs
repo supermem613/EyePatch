@@ -41,33 +41,38 @@ namespace EyePatch
                 ShowHelp();
                 return;
             }
-
-            Parser.Default.ParseArguments<Program.Options>(args)
-                .WithParsed(options =>
-                {
-                    ArgumentNullException.ThrowIfNull(options);
-
-                    if (options.Command.Equals("save", StringComparison.CurrentCultureIgnoreCase))
+            try
+            {
+                Parser.Default.ParseArguments<Program.Options>(args)
+                    .WithParsed(options =>
                     {
-                        Save.Execute(options.Name, settings);
-                    }
-                    else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
+                        ArgumentNullException.ThrowIfNull(options);
+                        if (options.Command.Equals("save", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            new Save().Execute(options.Name, settings);
+                        }
+                        else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            Diff.Execute(settings);
+                        }
+                        else if (options.Command.Equals("view", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            View.Execute(options.Name, settings);
+                        }
+                        else
+                        {
+                            throw new EyePatchException("Unknown command.");
+                        }
+                    })
+                    .WithNotParsed(errors =>
                     {
-                        Diff.Execute(settings);
-                    }
-                    else if (options.Command.Equals("view", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        View.Execute(options.Name, settings);
-                    }
-                    else
-                    {
-                        ConsoleWriter.WriteError("Unknown command.");
-                    }
-                })
-                .WithNotParsed(errors =>
-                {
-                    ConsoleWriter.WriteError("Failed to parse arguments. Use '--help' for usage instructions.");
-                });
+                        throw new EyePatchException("Failed to parse arguments. Use '--help' for usage instructions.");
+                    });
+            }
+            catch (EyePatchException ex)
+            {
+                ConsoleWriter.WriteError(ex.Message);
+            }
         }
     }
 }

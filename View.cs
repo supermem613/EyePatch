@@ -9,14 +9,12 @@ namespace EyePatch
         {
             if (string.IsNullOrEmpty(patchFilePath))
             {
-                ConsoleWriter.WriteError("Patch file path is required.");
-                return;
+                throw new EyePatchException("Patch file path is required.");
             }
 
             if (!File.Exists(patchFilePath))
             {
-                ConsoleWriter.WriteError($"Patch file not found: {patchFilePath}");
-                return;
+                throw new EyePatchException($"Patch file not found: {patchFilePath}");
             }
 
             // Create a temporary folder to store the base and patched files
@@ -42,10 +40,9 @@ namespace EyePatch
                 {
                     repo = new Repository(Environment.CurrentDirectory);
                 }
-                catch (LibGit2Sharp.RepositoryNotFoundException)
+                catch (LibGit2Sharp.RepositoryNotFoundException e)
                 {
-                    ConsoleWriter.WriteError("Not in a Git repository.");
-                    return;
+                    throw new EyePatchException("Not in a Git repository.", e);
                 }
 
                 List<string> diffFilePairs = [];
@@ -54,10 +51,9 @@ namespace EyePatch
                 {
                     // Get the base file content using the index hash
                     var blob = repo.Lookup<Blob>(patch.BaseIndex);
-                    if (blob == null)
+                    if (null == blob)
                     {
-                        ConsoleWriter.WriteError($"Base file not found for {patch.BaseFilePath}.");
-                        continue;
+                        throw new EyePatchException($"Base file not found for {patch.BaseFilePath}.");
                     }
 
                     // Write the base file content to a temporary file
@@ -79,9 +75,9 @@ namespace EyePatch
                     tempFolder,
                     diffFilePairs);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                ConsoleWriter.WriteError($"Error processing patch file: {ex.Message}");
+                throw new EyePatchException($"Error processing patch file: {e.Message}", e);
             }
             finally
             {
@@ -191,7 +187,7 @@ namespace EyePatch
                     // Queue the removal of the line
                     if (!modifications.TryGetValue(currentIndex, out var value))
                     {
-                        value = [];
+                        value = (List<string?>) [];
                         modifications[currentIndex] = value;
                     }
 

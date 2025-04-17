@@ -7,15 +7,14 @@ namespace EyePatch
     {
         public static void Execute(Settings settings)
         {
-            IRepository repo;
+            Repository repo;
             try
             {
                 repo = new Repository(Environment.CurrentDirectory);
             }
-            catch (LibGit2Sharp.RepositoryNotFoundException)
+            catch (LibGit2Sharp.RepositoryNotFoundException e)
             {
-                ConsoleWriter.WriteError("Not in a Git repository.");
-                return;
+                throw new EyePatchException("Not in a Git repository.", e);
             }
 
             // Get the current branch
@@ -27,10 +26,9 @@ namespace EyePatch
                 currentBranch.Tip,
                 repo.Branches["origin/main"].Tip);
 
-            if (parentCommit == null)
+            if (null == parentCommit)
             {
-                ConsoleWriter.WriteError("Could not determine the parent commit.");
-                return;
+                throw new EyePatchException("Could not determine the parent commit.");
             }
 
             ConsoleWriter.WriteInfo($"Parent Commit: {parentCommit.Sha}");
@@ -112,9 +110,9 @@ namespace EyePatch
 
                     diffFilePairs.Add($"{tempFilePath} {currentFilePath}");
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    ConsoleWriter.WriteError($"Error processing diff for {modifiedFile}: {ex.Message}");
+                    throw new EyePatchException($"Error processing diff for {modifiedFile}: {e.Message}", e);
                 }
             }
 
