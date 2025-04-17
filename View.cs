@@ -3,9 +3,9 @@ using LibGit2Sharp;
 
 namespace EyePatch
 {
-    internal static class View
+    internal class View
     {
-        public static void Execute(string patchFilePath, Settings settings)
+        public void Execute(string patchFilePath, Settings settings)
         {
             if (string.IsNullOrEmpty(patchFilePath))
             {

@@ -3,9 +3,9 @@ using LibGit2Sharp;
 
 namespace EyePatch
 {
-    internal static class Diff
+    internal class Diff
     {
-        public static void Execute(Settings settings)
+        public void Execute(Settings settings)
         {
             Repository repo;
             try

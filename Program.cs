@@ -53,11 +53,11 @@ namespace EyePatch
                         }
                         else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
                         {
-                            Diff.Execute(settings);
+                            new  Diff().Execute(settings);
                         }
                         else if (options.Command.Equals("view", StringComparison.CurrentCultureIgnoreCase))
                         {
-                            View.Execute(options.Name, settings);
+                            new View().Execute(options.Name, settings);
                         }
                         else
                         {
