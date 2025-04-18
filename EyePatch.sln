@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35919.96
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyePatch", "EyePatch.csproj", "{F1855EE8-A83E-4094-9E15-228E40386943}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyePatch.Tests", "P:\repos\EyePatch\EyePatch.Tests\EyePatch.Tests.csproj", "{2AC3C1EA-39C6-4F23-9A66-C26B0D93927F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EyePatch.Tests", ".\EyePatch.Tests\EyePatch.Tests.csproj", "{2AC3C1EA-39C6-4F23-9A66-C26B0D93927F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
