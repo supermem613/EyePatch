@@ -37,16 +37,49 @@ dotnet restore
 dotnet publish
 ```
 
+### Configuration
+
+Place a `.eyepatch.settings` JSON file in the root of user directory (%USERPROFILE%). This file is optional.
+
+#### JSON Settings Reference
+
+- **DiffApp**
+    Type: `string`
+    Default: `"windiff"`
+    Program to be invoked for diff-ing files. It is expected that windiff or whatever tool is called is installed and on the path. The
+    tool will be called with a text file containing a pair of original and modified file paths, a pair per line, such as:
+
+```sh
+a b
+c d
+```
+
+- **PatchDirectory**
+    Type: `string`
+    Default: %ONEDRIVE%\\patches
+    Absolute path to where patches should be saved. If not set, the tool will create (if it does not exist) a `patches` directory under %ONEDRIVE%.
+
+#### Example `.eyepatch.settings`
+
+```json
+{
+    "DiffApp": "joediff",
+    "PatchDirectory": "C:\\patches_go_here"
+}
+```
+
 ### Usage
 
 #### Save Patch
 
-Save the resultant committed changes in a branch since it forked, plus any current changes (staged or not), producing a single patch. Optionally specify a name for the patch file.
+Save the resultant committed changes in a branch since it forked, plus any current changes (staged or not), producing a single patch.
+
+Optionally specify a name for the patch file. If not file name is specified, the branch name will be used, choosing the string after `\`. This is meant to simplify the common pattern of naming branches `user\\alias\\name`. A time stamp with year, month, day, hours, minutes, seconds and milliseconds, using the `yyyyMMdd-HHmmss-fff` format is appended to provide uniqueness. Example patch file: `Feature1.20250409-194108-667.patch`.
 
 Should be executed in the context of a branch being checked out.
 
 ```sh
-eyepatch save [patch-name]
+eyepatch save [optional-patch-name]
 ```
 
 ### Diff Branch
