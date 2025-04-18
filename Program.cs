@@ -15,22 +15,26 @@ namespace EyePatch
         
         private static void ShowHelp()
         {
-            ConsoleWriter.WriteInfo("Usage: EyePatch <command> [options]");
-            ConsoleWriter.WriteNewLine();
-            ConsoleWriter.WriteInfo("Commands:");
-            ConsoleWriter.WriteInfo("  save   Save the resultant committed changes in a branch since it forked, plus any current changes (staged or not)");
-            ConsoleWriter.WriteInfo("         producing a single patch. Optionally specify a name for the patch file.");
-            ConsoleWriter.WriteNewLine();
-            ConsoleWriter.WriteInfo("  diff   Show the differences of the resultant committed changes in a branch since it forked, plus any current");
-            ConsoleWriter.WriteInfo("         changes (staged or not).");
-            ConsoleWriter.WriteNewLine();
-            ConsoleWriter.WriteInfo("  view   Show the differences of a given patch file against its base commit. Requires a name argument.");
-            ConsoleWriter.WriteNewLine();
-            ConsoleWriter.WriteInfo("Settings:");
-            ConsoleWriter.WriteInfo("  Configured in the .eyepatch.settings file in your user folder, as a JSON file.");
-            ConsoleWriter.WriteInfo("     DiffApp: The diff application to use (default: windiff).");
-            ConsoleWriter.WriteInfo("     PatchDirectory: The directory where patches are saved (default: OneDrive\\patches).");
-            ConsoleWriter.WriteNewLine();
+            ConsoleWriter.WriteInfo(@"
+    Usage: EyePatch <command> [options]
+
+    Go to https://github.com/supermem613/EyePatch for more information.
+
+    Commands:
+        save   Save the resultant committed changes in a branch since it forked, plus any current changes (staged or not)
+                producing a single patch. Optionally specify a name for the patch file.
+
+        diff   Show the differences of the resultant committed changes in a branch since it forked, plus any current
+                changes (staged or not).
+
+        view   Show the differences of a given patch file against its base commit. Requires a name argument.
+
+    Settings:
+        Configured in the .eyepatch.settings file in your user folder, as a JSON file.
+
+            DiffApp: The diff application to use (default: windiff).
+            PatchDirectory: The directory where patches are saved (default: OneDrive\patches).
+            ");
         }
 
         public static void Main(string[] args)
@@ -53,7 +57,7 @@ namespace EyePatch
                         }
                         else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
                         {
-                            new  Diff().Execute(settings);
+                            new Diff().Execute(settings);
                         }
                         else if (options.Command.Equals("view", StringComparison.CurrentCultureIgnoreCase))
                         {
