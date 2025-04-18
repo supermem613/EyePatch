@@ -2,16 +2,16 @@
 
 namespace EyePatch
 {
-    internal class Save
+    public class Save : Command
     {
-        public void Execute(string patchFileName, Settings settings)
+        public override void Execute(Settings settings, string? patchFileName = null)
         {
             Repository repo;
             try
             {
                 repo = new Repository(Environment.CurrentDirectory);
             }
-            catch (LibGit2Sharp.RepositoryNotFoundException e)
+            catch (RepositoryNotFoundException e)
             {
                 throw new EyePatchException("Not in a Git repository.", e);
             }
@@ -23,7 +23,7 @@ namespace EyePatch
         }
 
         internal void ExecuteWithRepo(
-            string patchFileName,
+            string? patchFileName,
             Settings settings,
             IRepository repo)
         {
@@ -32,7 +32,7 @@ namespace EyePatch
             ConsoleWriter.WriteInfo($"Current Branch: {currentBranch.FriendlyName}");
 
             // Use branch name as default patch file name if none is provided
-            if (string.IsNullOrEmpty(patchFileName))
+            if ((null == patchFileName) || string.IsNullOrEmpty(patchFileName))
             {
                 patchFileName = $"{currentBranch.FriendlyName}";
             }
@@ -75,7 +75,7 @@ namespace EyePatch
             }
 
             patchFileName = Path.Combine(
-                PatchDirectory.EnsurePatchesDirectoryExists(settings),
+                EnsurePatchesDirectoryExists(settings),
                 string.Concat(
                     patchFileName,
                     ".",

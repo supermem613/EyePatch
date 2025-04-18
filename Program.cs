@@ -7,10 +7,10 @@ namespace EyePatch
         private class Options
         {
             [Value(0, MetaName = "command", Required = true, HelpText = "The command to execute (e.g., save).")]
-            public required string Command { get; set; }
+            public required string Command { get; init; }
 
             [Value(1, MetaName = "name", Required = false, HelpText = "Optional name for the patch file.")]
-            public required string Name { get; set; }
+            public required string Name { get; init; }
         }
         
         private static void ShowHelp()
@@ -47,13 +47,13 @@ namespace EyePatch
             }
             try
             {
-                Parser.Default.ParseArguments<Program.Options>(args)
+                Parser.Default.ParseArguments<Options>(args)
                     .WithParsed(options =>
                     {
                         ArgumentNullException.ThrowIfNull(options);
                         if (options.Command.Equals("save", StringComparison.CurrentCultureIgnoreCase))
                         {
-                            new Save().Execute(options.Name, settings);
+                            new Save().Execute(settings, options.Name);
                         }
                         else if (options.Command.Equals("diff", StringComparison.CurrentCultureIgnoreCase))
                         {
@@ -61,17 +61,14 @@ namespace EyePatch
                         }
                         else if (options.Command.Equals("view", StringComparison.CurrentCultureIgnoreCase))
                         {
-                            new View().Execute(options.Name, settings);
+                            new View().Execute(settings, options.Name);
                         }
                         else
                         {
                             throw new EyePatchException("Unknown command.");
                         }
                     })
-                    .WithNotParsed(errors =>
-                    {
-                        throw new EyePatchException("Failed to parse arguments. Use '--help' for usage instructions.");
-                    });
+                    .WithNotParsed(_ => throw new EyePatchException("Failed to parse arguments."));
             }
             catch (EyePatchException ex)
             {

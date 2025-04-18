@@ -1,4 +1,3 @@
-using EyePatch;
 using LibGit2Sharp;
 using Moq;
 
@@ -176,7 +175,6 @@ namespace EyePatch.Tests
         {
             var mockSettings = new Mock<Settings>();
             var mockRepository = new Mock<IRepository>();
-            var mockDiffLauncher = new Mock<DiffLauncher>();
             var mockBranch = new Mock<Branch>();
             var mockObjectDatabase = new Mock<ObjectDatabase>(); // Added this line to define mockObjectDatabase
 

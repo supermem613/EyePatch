@@ -1,5 +1,3 @@
-using Castle.Components.DictionaryAdapter.Xml;
-using EyePatch;
 using LibGit2Sharp;
 using Moq;
 
@@ -8,8 +6,6 @@ namespace EyePatch.Tests
     [TestClass]
     public class SaveTests
     {
-        private const string _mockRepoPath = "c:\\does_not_exist";
-
         [TestMethod]
         public void Save_ShouldWriteError_WhenNotInGitRepository()
         {
@@ -20,7 +16,7 @@ namespace EyePatch.Tests
                     {
                         var mockSettings = new Mock<Settings>();
 
-                        new Save().Execute("test.patch", mockSettings.Object);
+                        new Save().Execute(mockSettings.Object, "test.patch");
                     }
                     catch (EyePatchException ex)
                     {
@@ -43,7 +39,7 @@ namespace EyePatch.Tests
                         var mockRepository = new Mock<IRepository>();
                         mockRepository.Setup(r => r.Branches["origin/main"].Tip).Returns((Commit)null!);
 
-                        new Save().Execute("test.patch", mockSettings.Object);
+                        new Save().Execute(mockSettings.Object, "test.patch");
                     }
                     catch (EyePatchException ex)
                     {
@@ -72,7 +68,9 @@ namespace EyePatch.Tests
                 DiffTargets.Index | DiffTargets.WorkingDirectory))
                 .Returns(mockPatch.Object);
 
-            var mockPatchEntries = new List<PatchEntryChanges>();
+            List<PatchEntryChanges> mockPatchEntries = [];
+            Assert.IsNotNull(mockPatchEntries);
+
             mockPatch.As<IEnumerable<PatchEntryChanges>>().Setup(p => p.GetEnumerator())
                 .Returns(mockPatchEntries.GetEnumerator());
 
@@ -114,6 +112,7 @@ namespace EyePatch.Tests
 
             var mockSave = new Mock<Save>();
             mockSave.Setup(s => s.WriteAndVerifyPatchFile(It.IsAny<string>(), It.IsAny<Patch>()));
+            mockSave.Setup(s => s.EnsurePatchesDirectoryExists(It.IsAny<Settings>())).Returns(string.Empty);
 
             mockSave.Object.ExecuteWithRepo("test.patch", mockSettings.Object, mockRepository.Object);
 

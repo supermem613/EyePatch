@@ -3,21 +3,21 @@ using LibGit2Sharp;
 
 namespace EyePatch
 {
-    internal class View
+    internal class View : Command
     {
-        public void Execute(string patchFilePath, Settings settings)
+        public override void Execute(Settings settings, string? patchFilePath = null)
         {
             Repository repo;
             try
             {
                 repo = new Repository(Environment.CurrentDirectory);
             }
-            catch (LibGit2Sharp.RepositoryNotFoundException e)
+            catch (RepositoryNotFoundException e)
             {
                 throw new EyePatchException("Not in a Git repository.", e);
             }
 
-            if (string.IsNullOrEmpty(patchFilePath))
+            if ((null == patchFilePath) || string.IsNullOrEmpty(patchFilePath))
             {
                 throw new EyePatchException("Patch file path is required.");
             }
@@ -290,7 +290,7 @@ namespace EyePatch
             return string.Join(Environment.NewLine, patchedLines);
         }
 
-        private static (int BaseStartLine, int BaseLineCount, int TargetStartLine, int TargetLineCount) ParseHunkHeader(string hunkHeader)
+        private static (int, int, int, int) ParseHunkHeader(string hunkHeader)
         {
             // Example hunk header: @@ -3,7 +3,8 @@
             var parts = hunkHeader.Split(' ');

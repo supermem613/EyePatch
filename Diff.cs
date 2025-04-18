@@ -1,18 +1,17 @@
-﻿using System.Diagnostics;
-using LibGit2Sharp;
+﻿using LibGit2Sharp;
 
 namespace EyePatch
 {
-    internal class Diff
+    internal class Diff : Command
     {
-        public void Execute(Settings settings)
+        public override void Execute(Settings settings, string? arg = null)
         {
             Repository repo;
             try
             {
                 repo = new Repository(Environment.CurrentDirectory);
             }
-            catch (LibGit2Sharp.RepositoryNotFoundException e)
+            catch (RepositoryNotFoundException e)
             {
                 throw new EyePatchException("Not in a Git repository.", e);
             }

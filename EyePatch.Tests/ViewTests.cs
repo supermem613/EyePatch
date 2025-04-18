@@ -13,8 +13,8 @@ namespace EyePatch.Tests
         {
             var view = new Mock<View> { CallBase = true };
             var settings = new Mock<Settings>().Object;
-            Assert.ThrowsException<EyePatchException>(() => view.Object.Execute(null!, settings));
-            Assert.ThrowsException<EyePatchException>(() => view.Object.Execute("", settings));
+            Assert.ThrowsException<EyePatchException>(() => view.Object.Execute(settings, null!));
+            Assert.ThrowsException<EyePatchException>(() => view.Object.Execute(settings, ""));
         }
 
         [TestMethod]
@@ -22,7 +22,7 @@ namespace EyePatch.Tests
         {
             var view = new Mock<View> { CallBase = true };
             var settings = new Mock<Settings>().Object;
-            Assert.ThrowsException<EyePatchException>(() => view.Object.Execute("does_not_exist.patch", settings));
+            Assert.ThrowsException<EyePatchException>(() => view.Object.Execute(settings, "does_not_exist.patch"));
         }
 
         [TestMethod]
