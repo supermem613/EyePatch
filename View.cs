@@ -94,28 +94,6 @@ namespace EyePatch
             return blob;
         }
 
-        internal virtual void DeleteTempFolder(string tempFolder)
-        {
-            // Clean up the temporary folder
-            if (Directory.Exists(tempFolder))
-            {
-                Directory.Delete(tempFolder, true);
-            }
-        }
-
-        internal virtual string CreateTempFolder()
-        {
-            var tempFolder = Path.Combine(Path.GetTempPath(), $"EyePatch-View-{Guid.NewGuid()}");
-            if (Directory.Exists(tempFolder))
-            {
-                Directory.Delete(tempFolder, true);
-            }
-
-            Directory.CreateDirectory(tempFolder);
-
-            return tempFolder;
-        }
-
         internal virtual void WritePatchedBlobToFile(string patchedFilePath, string patchedContent)
         {
             File.WriteAllText(patchedFilePath, patchedContent);

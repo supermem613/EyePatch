@@ -54,5 +54,29 @@ namespace EyePatch
             process.Start();
             process.WaitForExit();
         }
+
+        internal virtual string CreateTempFolder()
+        {
+            var tempFolder = Path.Combine(Path.GetTempPath(), $"EyePatch-{Guid.NewGuid()}");
+
+            // Clear the directory if it already exists
+            if (Directory.Exists(tempFolder))
+            {
+                Directory.Delete(tempFolder, true);
+            }
+
+            Directory.CreateDirectory(tempFolder);
+
+            return tempFolder;
+        }
+
+        internal virtual void DeleteTempFolder(string tempFolder)
+        {
+            // Clean up the temporary folder
+            if (Directory.Exists(tempFolder))
+            {
+                Directory.Delete(tempFolder, true);
+            }
+        }
     }
 }
