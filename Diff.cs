@@ -154,13 +154,5 @@ namespace EyePatch
 
             return tempFolder;
         }
-
-        internal virtual void LaunchDiffTool(Settings settings, string tempFolder, List<string> diffFilePairs)
-        {
-            new DiffLauncher().LaunchDiffTool(
-                settings,
-                tempFolder,
-                diffFilePairs);
-        }
     }
 }

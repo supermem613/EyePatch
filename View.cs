@@ -125,14 +125,6 @@ namespace EyePatch
         {
             File.WriteAllText(baseFilePath, blob.GetContentText());
         }
-
-        internal virtual void LaunchDiffTool(Settings settings, string tempFolder, List<string> diffFilePairs)
-        {
-            new DiffLauncher().LaunchDiffTool(
-                settings,
-                tempFolder,
-                diffFilePairs);
-        }
     }
 
     internal class FilePatchParser(string patchContent)
