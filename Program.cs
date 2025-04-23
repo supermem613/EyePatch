@@ -21,13 +21,15 @@ namespace EyePatch
     Go to https://github.com/supermem613/EyePatch for more information.
 
     Commands:
-        save   Save the resultant committed changes in a branch since it forked, plus any current changes (staged or not)
+        save    Save the resultant committed changes in a branch since it forked, plus any current changes (staged or not)
                 producing a single patch. Optionally specify a name for the patch file.
 
-        diff   Show the differences of the resultant committed changes in a branch since it forked, plus any current
+        diff    Show the differences of the resultant committed changes in a branch since it forked, plus any current
                 changes (staged or not).
 
-        view   Show the differences of a given patch file against its base commit. Requires a name argument.
+        view    Show the differences of a given patch file against its base commit. Requires a name argument.
+
+        status  Show the current changes and tells you if conflicts are in place.
 
     Settings:
         Configured in the .eyepatch.settings file in your user folder, as a JSON file.
@@ -62,6 +64,10 @@ namespace EyePatch
                         else if (options.Command.Equals("view", StringComparison.CurrentCultureIgnoreCase))
                         {
                             new View().Execute(settings, options.Name);
+                        }
+                        else if (options.Command.Equals("status", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            new Status().Execute(settings);
                         }
                         else
                         {

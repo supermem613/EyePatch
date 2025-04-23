@@ -1,6 +1,4 @@
-using EyePatch;
 using LibGit2Sharp;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace EyePatch.Tests

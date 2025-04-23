@@ -102,6 +102,16 @@ Should be executed in the context of a branch being checked out.
 eyepatch view <patch-file>
 ```
 
+### Status
+
+Show the currently changes, added or removed files and identifies if they will conflicts with newer commits.
+
+Should be executed in the context of a branch being checked out.
+
+```sh
+eyepatch status
+```
+
 #### Help
 
 ```sh
