@@ -11,7 +11,7 @@ namespace EyePatch.Tests
         {
             var view = new Mock<View> { CallBase = true };
             var settings = new Mock<Settings>().Object;
-            Assert.ThrowsException<EyePatchException>(() => view.Object.Execute(settings, null!));
+            Assert.ThrowsException<EyePatchException>(() => view.Object.Execute(settings));
             Assert.ThrowsException<EyePatchException>(() => view.Object.Execute(settings, ""));
         }
 

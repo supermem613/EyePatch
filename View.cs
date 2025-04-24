@@ -189,7 +189,7 @@ namespace EyePatch
                 if (line.StartsWith("@@")) // Hunk header
                 {
                     // Parse the hunk header to get the line numbers
-                    var (baseStartLine, _, _, _) = ParseHunkHeader(line);
+                    var baseStartLine = ParseHunkHeader(line);
 
                     // Zero is a special case when we are removing / inserting at the top of the file.
                     if (baseStartLine != 0)
@@ -260,20 +260,15 @@ namespace EyePatch
             return string.Join(Environment.NewLine, patchedLines);
         }
 
-        private static (int, int, int, int) ParseHunkHeader(string hunkHeader)
+        private static int ParseHunkHeader(string hunkHeader)
         {
             // Example hunk header: @@ -3,7 +3,8 @@
             var parts = hunkHeader.Split(' ');
             var baseInfo = parts[1][1..].Split(',');
-            var targetInfo = parts[2][1..].Split(',');
 
             var baseStartLine = int.Parse(baseInfo[0]);
-            var baseLineCount = baseInfo.Length > 1 ? int.Parse(baseInfo[1]) : 1;
 
-            var targetStartLine = int.Parse(targetInfo[0]);
-            var targetLineCount = targetInfo.Length > 1 ? int.Parse(targetInfo[1]) : 1;
-
-            return (baseStartLine, baseLineCount, targetStartLine, targetLineCount);
+            return baseStartLine;
         }
     }
 
