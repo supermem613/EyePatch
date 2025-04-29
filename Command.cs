@@ -1,3 +1,4 @@
+using LibGit2Sharp;
 using System.Diagnostics;
 
 namespace EyePatch
@@ -77,6 +78,21 @@ namespace EyePatch
             {
                 Directory.Delete(tempFolder, true);
             }
+        }
+
+        internal virtual Repository FindRepository()
+        {
+            Repository repo;
+            try
+            {
+                repo = new Repository(Environment.CurrentDirectory);
+            }
+            catch (RepositoryNotFoundException e)
+            {
+                throw new EyePatchException("Not in a Git repository.", e);
+            }
+
+            return repo;
         }
     }
 }

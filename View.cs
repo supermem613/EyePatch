@@ -7,15 +7,7 @@ namespace EyePatch
     {
         public override void Execute(Settings settings, string? patchFilePath = null)
         {
-            Repository repo;
-            try
-            {
-                repo = new Repository(Environment.CurrentDirectory);
-            }
-            catch (RepositoryNotFoundException e)
-            {
-                throw new EyePatchException("Not in a Git repository.", e);
-            }
+            var repo = FindRepository();
 
             if ((null == patchFilePath) || string.IsNullOrEmpty(patchFilePath))
             {
