@@ -12,17 +12,13 @@ namespace EyePatch.Tests
             Assert.ThrowsException<EyePatchException>(
                 () =>
                 {
-                    try
-                    {
-                        var mockSettings = new Mock<Settings>();
+                    var mockSettings = new Mock<Settings>();
 
-                        new Status().Execute(mockSettings.Object);
-                    }
-                    catch (EyePatchException ex)
-                    {
-                        Assert.IsInstanceOfType(ex.InnerException, typeof(RepositoryNotFoundException));
-                        throw;
-                    }
+                    var mockStatus = new Mock<Status> { CallBase = true };
+                    mockStatus.Setup(d => d.FindRepository())
+                        .Throws(new EyePatchException("Not in a Git repository.", new RepositoryNotFoundException()));
+
+                    mockStatus.Object.Execute(mockSettings.Object);
                 });
         }
 
@@ -32,20 +28,16 @@ namespace EyePatch.Tests
             Assert.ThrowsException<EyePatchException>(
                 () =>
                 {
-                    try
-                    {
-                        var mockSettings = new Mock<Settings>();
+                    var mockSettings = new Mock<Settings>();
 
-                        var mockRepository = new Mock<IRepository>();
-                        mockRepository.Setup(r => r.Branches["origin/main"].Tip).Returns((Commit)null!);
+                    var mockRepository = new Mock<IRepository>();
+                    mockRepository.Setup(r => r.Branches["origin/main"].Tip).Returns((Commit)null!);
 
-                        new Status().Execute(mockSettings.Object, "test.patch");
-                    }
-                    catch (EyePatchException ex)
-                    {
-                        Assert.IsInstanceOfType(ex.InnerException, typeof(RepositoryNotFoundException));
-                        throw;
-                    }
+                    var mockStatus = new Mock<Status> { CallBase = true };
+                    mockStatus.Setup(d => d.FindRepository())
+                        .Returns(mockRepository.Object);
+
+                    mockStatus.Object.Execute(mockSettings.Object, "test.patch");
                 });
         }
     }

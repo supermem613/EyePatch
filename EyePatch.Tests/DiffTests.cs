@@ -1,5 +1,6 @@
 using LibGit2Sharp;
 using Moq;
+using System.Reflection;
 
 namespace EyePatch.Tests
 {
@@ -144,29 +145,13 @@ namespace EyePatch.Tests
             Assert.ThrowsException<EyePatchException>(
                 () =>
                 {
-                    try
-                    {
-                        var mockSettings = new Mock<Settings>();
-
-                        new Diff().Execute(mockSettings.Object);
-                    }
-                    catch (EyePatchException ex)
-                    {
-                        Assert.IsInstanceOfType(ex.InnerException, typeof(RepositoryNotFoundException));
-                        throw;
-                    }
-                });
-        }
-
-        [TestMethod]
-        public void Diff_ShouldThrowError_WhenPatchFileNotFound()
-        {
-            Assert.ThrowsException<EyePatchException>(
-                () =>
-                {
                     var mockSettings = new Mock<Settings>();
 
-                    new Diff().Execute(mockSettings.Object);
+                    var mockDiff = new Mock<Diff> { CallBase = true };
+                    mockDiff.Setup(d => d.FindRepository())
+                        .Throws(new EyePatchException("Not in a Git repository.", new RepositoryNotFoundException()));
+
+                    mockDiff.Object.Execute(mockSettings.Object);
                 });
         }
 

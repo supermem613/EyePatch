@@ -18,7 +18,12 @@ namespace EyePatch
                 IncludeIgnored = false,
                 IncludeUnaltered = false
             };
+            
             var repoStatus = repo.RetrieveStatus(statusOptions);
+            if (repoStatus == null)
+            {
+                throw new EyePatchException("No status on repo");
+            }
 
             TreeChanges? remoteChanges = null;
             var mainBranch = repo.Branches["main"];

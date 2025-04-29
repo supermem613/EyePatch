@@ -80,19 +80,18 @@ namespace EyePatch
             }
         }
 
-        internal virtual Repository FindRepository()
+        internal virtual IRepository FindRepository()
         {
             Repository repo;
             try
             {
                 // Traverse up the directory tree to find the Git repository
                 var repoPath = Repository.Discover(Environment.CurrentDirectory);
-                if (repoPath == null)
+                repo = repoPath switch
                 {
-                    throw new EyePatchException("Not in a Git repository.");
-                }
-
-                repo = new Repository(repoPath);
+                    null => throw new EyePatchException("Not in a Git repository."),
+                    _ => new Repository(repoPath)
+                };
             }
             catch (RepositoryNotFoundException e)
             {

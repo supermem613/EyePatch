@@ -12,17 +12,13 @@ namespace EyePatch.Tests
             Assert.ThrowsException<EyePatchException>(
                 () =>
                 {
-                    try
-                    {
-                        var mockSettings = new Mock<Settings>();
+                    var mockSettings = new Mock<Settings>();
 
-                        new Save().Execute(mockSettings.Object, "test.patch");
-                    }
-                    catch (EyePatchException ex)
-                    {
-                        Assert.IsInstanceOfType(ex.InnerException, typeof(RepositoryNotFoundException));
-                        throw;
-                    }
+                    var saveDiff = new Mock<Save> { CallBase = true };
+                    saveDiff.Setup(d => d.FindRepository())
+                        .Throws(new EyePatchException("Not in a Git repository.", new RepositoryNotFoundException()));
+
+                    saveDiff.Object.Execute(mockSettings.Object, "test.patch");
                 });
         }
 
@@ -32,20 +28,21 @@ namespace EyePatch.Tests
             Assert.ThrowsException<EyePatchException>(
                 () =>
                 {
-                    try
-                    {
-                        var mockSettings = new Mock<Settings>();
+                    var mockSettings = new Mock<Settings>();
 
-                        var mockRepository = new Mock<IRepository>();
-                        mockRepository.Setup(r => r.Branches["origin/main"].Tip).Returns((Commit)null!);
+                    var mockBranch = new Mock<Branch>();
 
-                        new Save().Execute(mockSettings.Object, "test.patch");
-                    }
-                    catch (EyePatchException ex)
-                    {
-                        Assert.IsInstanceOfType(ex.InnerException, typeof(RepositoryNotFoundException));
-                        throw;
-                    }
+                    var mockRepository = new Mock<IRepository>();
+                    mockRepository.Setup(r => r.Branches["origin/main"].Tip).Returns((Commit)null!);
+                    mockRepository.Setup(r => r.Head).Returns(mockBranch.Object);
+                    mockRepository.Setup(r => r.ObjectDatabase.FindMergeBase(It.IsAny<Commit>(), It.IsAny<Commit>()))
+                        .Returns((Commit)null);
+
+                    var saveDiff = new Mock<Save> { CallBase = true };
+                    saveDiff.Setup(d => d.FindRepository())
+                        .Returns(mockRepository.Object);
+
+                    saveDiff.Object.Execute(mockSettings.Object, "test.patch");
                 });
         }
 
