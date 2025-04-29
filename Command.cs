@@ -85,7 +85,14 @@ namespace EyePatch
             Repository repo;
             try
             {
-                repo = new Repository(Environment.CurrentDirectory);
+                // Traverse up the directory tree to find the Git repository
+                var repoPath = Repository.Discover(Environment.CurrentDirectory);
+                if (repoPath == null)
+                {
+                    throw new EyePatchException("Not in a Git repository.");
+                }
+
+                repo = new Repository(repoPath);
             }
             catch (RepositoryNotFoundException e)
             {
