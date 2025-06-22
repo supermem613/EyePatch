@@ -36,7 +36,7 @@ namespace EyePatch.Tests
                     mockRepository.Setup(r => r.Branches["origin/main"].Tip).Returns((Commit)null!);
                     mockRepository.Setup(r => r.Head).Returns(mockBranch.Object);
                     mockRepository.Setup(r => r.ObjectDatabase.FindMergeBase(It.IsAny<Commit>(), It.IsAny<Commit>()))
-                        .Returns((Commit)null);
+                        .Returns((Commit)null!);
 
                     var saveDiff = new Mock<Save> { CallBase = true };
                     saveDiff.Setup(d => d.FindRepository())
