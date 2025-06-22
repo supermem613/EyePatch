@@ -197,7 +197,13 @@ namespace EyePatch.Tests
             var mockRepository = new Mock<IRepository>();
             var mockBranch = new Mock<Branch>();
             var mockObjectDatabase = new Mock<ObjectDatabase>(); // Added this line to define mockObjectDatabase
+            var mockRepositoryStatus = new Mock<RepositoryStatus>();
 
+            mockRepositoryStatus.Setup(s => s.GetEnumerator())
+                .Returns(new List<StatusEntry>().GetEnumerator());
+
+            mockRepository.Setup(r => r.RetrieveStatus(It.IsAny<StatusOptions>()))
+                .Returns(mockRepositoryStatus.Object);
             mockRepository.Setup(r => r.Head).Returns(mockBranch.Object);
 
             // Simulate no changes in the repository
@@ -251,7 +257,13 @@ namespace EyePatch.Tests
             var mockTip = new Mock<Commit>();
             var mockOriginMainBranch = new Mock<Branch>();
             var mockOriginMainTip = new Mock<Commit>();
+            var mockRepositoryStatus = new Mock<RepositoryStatus>();
 
+            mockRepositoryStatus.Setup(s => s.GetEnumerator())
+                .Returns(new List<StatusEntry>().GetEnumerator());
+
+            mockRepository.Setup(r => r.RetrieveStatus(It.IsAny<StatusOptions>()))
+                .Returns(mockRepositoryStatus.Object);
             mockRepository.Setup(r => r.Info.WorkingDirectory).Returns("C:/mock/repo/path");
             mockRepository.Setup(r => r.ObjectDatabase).Returns(mockObjectDatabase.Object);
             mockRepository.Setup(r => r.Branches["origin/main"]).Returns(mockOriginMainBranch.Object);
@@ -322,9 +334,23 @@ namespace EyePatch.Tests
             var mockTip = new Mock<Commit>();
             var mockOriginMainBranch = new Mock<Branch>();
             var mockOriginMainTip = new Mock<Commit>();
+            var mockRepositoryStatus = new Mock<RepositoryStatus>();
+            var mockStatusEntry = new Mock<StatusEntry>();
+            mockStatusEntry.Setup(s => s.FilePath).Returns("modifiedFile.txt");
+            mockStatusEntry.Setup(s => s.State).Returns(FileStatus.ModifiedInWorkdir);
+
+            var workingListEntries = new List<StatusEntry>
+            {
+                mockStatusEntry.Object,
+            };
+
+            mockRepositoryStatus.Setup(s => s.GetEnumerator())
+                .Returns(workingListEntries.GetEnumerator());
 
             mockRepository.Setup(r => r.Info.WorkingDirectory).Returns("C:/mock/repo/path");
             mockRepository.Setup(r => r.ObjectDatabase).Returns(mockObjectDatabase.Object);
+            mockRepository.Setup(r => r.RetrieveStatus(It.IsAny<StatusOptions>()))
+                .Returns(mockRepositoryStatus.Object);
             mockRepository.Setup(r => r.Branches["origin/main"]).Returns(mockOriginMainBranch.Object);
             mockBranch.Setup(b => b.Tip).Returns(mockTip.Object);
             mockOriginMainBranch.Setup(b => b.Tip).Returns(mockOriginMainTip.Object);
